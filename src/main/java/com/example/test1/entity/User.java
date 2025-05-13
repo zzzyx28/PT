@@ -1,10 +1,13 @@
-package com.example.test1.dto.entity;
+package com.example.test1.entity;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 //import com.rocketpt.server.common.exception.RocketPTException;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -16,18 +19,104 @@ import java.time.LocalDateTime;
  * @email
  * @date 2025-04-20
  */
-@Data
-@TableName("t_user")
-public class UserEntity {
+@Entity
+@Table(name = "user")
+public class User {
+    public String getUserId() {
+        return userId;
+    }
 
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
-    @TableId
-    private Integer id;
+    public String getUserName() {
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+    }
+
+    public String getNickname() {
+        return nickname;
+    }
+
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public Integer getGender() {
+        return gender;
+    }
+
+    public void setGender(Integer gender) {
+        this.gender = gender;
+    }
+
+    public Integer getState() {
+        return state;
+    }
+
+    public void setState(Integer state) {
+        this.state = state;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public Long getUploaded() {
+        return uploaded;
+    }
+
+    public void setUploaded(Long uploaded) {
+        this.uploaded = uploaded;
+    }
+
+    public Long getDownloaded() {
+        return downloaded;
+    }
+
+    public void setDownloaded(Long downloaded) {
+        this.downloaded = downloaded;
+    }
+
+    public Long getBonus() {
+        return bonus;
+    }
+
+    public void setBonus(Long bonus) {
+        this.bonus = bonus;
+    }
+
+    public Long getExp() {
+        return exp;
+    }
+
+    public void setExp(Long exp) {
+        this.exp = exp;
+    }
+
+    @Id
+    private String userId;
     /**
      * 账户名
      */
-    @Schema(description = "username")
-    private String username;
+    @Schema(description = "userName")
+    private String userName;
     /**
      * 头像
      */
@@ -118,33 +207,12 @@ public class UserEntity {
      * 做种时间
      */
     @Schema(description = "做种时间")
-    private Long seedtime;
+    private Long seedTime;
     /**
      * 下载时间
      */
     @Schema(description = "下载时间")
-    private Long leechtime;
-
-    /**
-     * 警告
-     */
-    @Schema(description = "警告状态")
-    private Boolean warning;
-    /**
-     * 警告者
-     */
-    @Schema(description = "警告者")
-    private Long warningBy;
-    /**
-     * 总警告次数
-     */
-    @Schema(description = "总警告次数")
-    private Integer warningTimes;
-    /**
-     * 警告到期时间
-     */
-    @Schema(description = "警告到期时间")
-    private LocalDateTime warningUntil;
+    private Long leechTime;
 
     /**
      *
@@ -169,53 +237,6 @@ public class UserEntity {
      */
     @Schema(description = "经验值")
     private Long exp;
-
-    @RequiredArgsConstructor
-    public enum Gender {
-        MALE(0),
-        FEMALE(1),
-        OTHER(2);
-
-        @EnumValue
-        @Getter
-        private final int code;
-
-        public static Gender valueof(Integer value) throws Exception {
-            if (value == null) {
-                return OTHER;
-            }
-
-            for (Gender gender : Gender.values()) {
-                if (gender.code == value) {
-                    return gender;
-                }
-            }
-
-            throw new Exception("性别错误");
-        }
-    }
-
-    @RequiredArgsConstructor
-    public enum State {
-        NORMAL(0),
-        LOCKED(1),
-        INACTIVATED(2);
-        @EnumValue
-        @Getter
-        private final int code;
-    }
-
-    public boolean userLocked() {
-        return this.state == State.LOCKED.code;
-    }
-
-    /**
-     * @return 用户状态正常
-     */
-    public boolean isUserOK() {
-
-        return this.state == State.NORMAL.code;
-    }
 
 
 }

@@ -1,0 +1,8 @@
+spring:
+    application:
+        name: pt
+    datasource:
+        driver-class-name: com.mysql.cj.jdbc.Driver
+        url: rm-bp157o1t88nfl189jjo.mysql.rds.aliyuncs.com:3306/pt
+        username: root
+        password: Gu1152505423

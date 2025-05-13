@@ -1,4 +1,4 @@
-package com.example.test1.dto.entity;
+package com.example.test1.entity;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -6,6 +6,9 @@ import com.baomidou.mybatisplus.annotation.TableName;
 
 import java.time.LocalDateTime;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -15,15 +18,14 @@ import lombok.RequiredArgsConstructor;
  * @email
  * @date 2025-04-20
  */
-@Data
-@TableName("t_torrent")
-public class TorrentEntity {
-
+@Entity
+@Table(name = "torrent")
+public class Torrent {
     /**
      *
      */
-    @TableId
-    private Integer id;
+    @Id
+    private String torrentId;
     /**
      * 种子哈希
      */
