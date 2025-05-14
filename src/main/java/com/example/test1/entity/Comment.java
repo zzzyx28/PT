@@ -3,6 +3,9 @@ package com.example.test1.entity;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -12,11 +15,16 @@ import java.time.LocalDateTime;
  * @email
  * @date 2025-04-20
  */
+<<<<<<< HEAD
 
 @Data
 @TableName("comment")
+=======
+@Entity
+@Table(name = "comment")
+>>>>>>> a1f2ff4f9bea80cc065a6a9f7d7f3e9a67a19c6b
 public class Comment {
-    @TableId
+    @Id
     private String commentId;
     @Schema(description = "LikesNumber")
     private int likesNumber;
