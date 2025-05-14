@@ -46,19 +46,19 @@ public class User {
         this.nickname = nickname;
     }
 
-    public Integer getGender() {
+    public int getGender() {
         return gender;
     }
 
-    public void setGender(Integer gender) {
+    public void setGender(int gender) {
         this.gender = gender;
     }
 
-    public Integer getState() {
+    public int getState() {
         return state;
     }
 
-    public void setState(Integer state) {
+    public void setState(int state) {
         this.state = state;
     }
 
@@ -74,7 +74,7 @@ public class User {
         return level;
     }
 
-    public void setLevel(Integer level) {
+    public void setLevel(int level) {
         this.level = level;
     }
 

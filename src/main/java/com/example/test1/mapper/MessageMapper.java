@@ -4,10 +4,11 @@ import com.example.test1.entity.Message;
 import com.example.test1.entity.User;
 import org.apache.ibatis.annotations.*;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-@Mapper
+//@Mapper
 public interface MessageMapper extends JpaRepository<Message, Long> {
     @Select("select * from message")
     List<Message> selectAll();

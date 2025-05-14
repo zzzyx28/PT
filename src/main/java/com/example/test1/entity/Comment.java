@@ -16,26 +16,53 @@ import java.time.LocalDateTime;
 @TableName("comment")
 public class Comment {
     @TableId
-    private String CommentId;
+    private String commentId;
     @Schema(description = "LikesNumber")
-    private int LikesNumber;
+    private int likesNumber;
 
     private String content;
 
-    private LocalDateTime CommentPostingTime;
+    private LocalDateTime commentAt;
 
     private String postUser;
 
-    private String getCommentId() {
-        return CommentId;
+    public String getCommentId() {
+        return commentId;
     }
 
-    private String getContent() {
+    public void setCommentId(String commentId) {
+        this.commentId = commentId;
+    }
+
+    public int getLikesNumber() {
+        return likesNumber;
+    }
+
+    public void setLikesNumber(int likesNumber) {
+        this.likesNumber = likesNumber;
+    }
+
+    public String getContent() {
         return content;
     }
 
-    private int getLikesNumber() {
-        return LikesNumber;
+    public void setContent(String content) {
+        this.content = content;
     }
 
+    public LocalDateTime getCommentAt() {
+        return commentAt;
+    }
+
+    public void setCommentAt(LocalDateTime commentAt) {
+        this.commentAt = commentAt;
+    }
+
+    public String getPostUser() {
+        return postUser;
+    }
+
+    public void setPostUser(String postUser) {
+        this.postUser = postUser;
+    }
 }

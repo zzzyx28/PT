@@ -1,11 +1,12 @@
 package com.example.test1.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.ManyToAny;
+import lombok.Data;
 
 import java.time.LocalDateTime;
 
-@Entity
+@Data
+@Table(name = "message")
 public class Message {
     @Id
     private String messageId;

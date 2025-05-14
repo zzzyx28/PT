@@ -21,6 +21,150 @@ import lombok.RequiredArgsConstructor;
 @Entity
 @Table(name = "torrent")
 public class Torrent {
+    public String getTorrentId() {
+        return torrentId;
+    }
+
+    public void setTorrentId(String torrentId) {
+        this.torrentId = torrentId;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Integer getFileStatus() {
+        return fileStatus;
+    }
+
+    public void setFileStatus(Integer fileStatus) {
+        this.fileStatus = fileStatus;
+    }
+
+    public LocalDateTime getCreateTime() {
+        return createTime;
+    }
+
+    public void setCreateTime(LocalDateTime createTime) {
+        this.createTime = createTime;
+    }
+
+    public LocalDateTime getUpdateTime() {
+        return updateTime;
+    }
+
+    public void setUpdateTime(LocalDateTime updateTime) {
+        this.updateTime = updateTime;
+    }
+
+    public String getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(String ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public Long getSize() {
+        return size;
+    }
+
+    public void setSize(Long size) {
+        this.size = size;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public Integer getComments() {
+        return comments;
+    }
+
+    public void setComments(Integer comments) {
+        this.comments = comments;
+    }
+
+    public Integer getViews() {
+        return views;
+    }
+
+    public void setViews(Integer views) {
+        this.views = views;
+    }
+
+    public Integer getHits() {
+        return hits;
+    }
+
+    public void setHits(Integer hits) {
+        this.hits = hits;
+    }
+
+    public Integer getLeechers() {
+        return leechers;
+    }
+
+    public void setLeechers(Integer leechers) {
+        this.leechers = leechers;
+    }
+
+    public Integer getSeeders() {
+        return seeders;
+    }
+
+    public void setSeeders(Integer seeders) {
+        this.seeders = seeders;
+    }
+
+    public Integer getCompletions() {
+        return completions;
+    }
+
+    public void setCompletions(Integer completions) {
+        this.completions = completions;
+    }
+
     /**
      *
      */
@@ -91,7 +235,7 @@ public class Torrent {
     /**
      * 拥有者
      */
-    private Integer owner;
+    private String ownerId;
     /**
      * 文件大小
      */
@@ -168,15 +312,15 @@ public class Torrent {
 
     }
 
-    @RequiredArgsConstructor
-    public enum Type {
-        single(1),
-        multi(2);
-
-        @Getter
-        @EnumValue
-        private final int code;
-    }
+//    @RequiredArgsConstructor
+//    public enum Type {
+//        single(1),
+//        multi(2);
+//
+//        @Getter
+//        @EnumValue
+//        private final int code;
+//    }
 
     public boolean isStatusOK() {
 
