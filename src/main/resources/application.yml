@@ -3,6 +3,10 @@ spring:
         name: pt
     datasource:
         driver-class-name: com.mysql.cj.jdbc.Driver
-        url: rm-bp157o1t88nfl189jjo.mysql.rds.aliyuncs.com:3306/pt
+        url: jdbc:mysql://rm-bp157o1t88nfl189jjo.mysql.rds.aliyuncs.com:3306/pt?serverTimezone=Asia/Shanghai&useSSL=false
         username: root
         password: Gu1152505423
+    jpa:
+        hibernate:
+            ddl-auto: update  # 可选，自动更新表结构
+        show-sql: true      # 可选，显示SQL日志
