@@ -1,5 +1,7 @@
 package com.example.test1.service;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.test1.entity.Torrent;
 import com.example.test1.entity.User;
 import com.example.test1.exception.BencodeException;
@@ -8,6 +10,7 @@ import com.example.test1.mapper.TorrentMapper;
 import com.example.test1.mapper.UserMapper;
 import com.example.test1.util.TorrentFileParser;
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -142,5 +146,12 @@ public class TorrentService {
         }
         // 根据你的认证系统实现调整
         return principal.getName(); // 示例：假设principal.getName()返回用户ID
+    }
+
+
+    public List<Torrent> listTorrents(int page, int size) {
+        Page<Torrent> pageRequest = new Page<>(page, size);
+        Page<Torrent> resultPage = torrentMapper.selectPage(pageRequest, new QueryWrapper<>());
+        return resultPage.getRecords();
     }
 }
