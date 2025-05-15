@@ -1,28 +1,24 @@
-//package com.example.test1.mapper;
-//
-//import com.example.test1.entity.Message;
-//import com.example.test1.entity.User;
-//import org.apache.ibatis.annotations.*;
-//import org.springframework.data.jpa.repository.JpaRepository;
-//import org.springframework.stereotype.Repository;
-//
-//import java.util.List;
-//
-////@Mapper
-//public interface MessageMapper extends JpaRepository<Message, Long> {
-//    @Select("select * from message")
-//    List<Message> selectAll();
-//
-//    @Select("select * from message where senderId = #{senderId}")
-//    List<Message> selectBySenderId(String senderId);
-//
-//    @Select("select * from message where receiverId = #{receiverId}")
-//    List<Message> selectByReceiverId(String receiverId);
-//
-//    @Delete("delete from message where messageId = #{messageId}")
-//    void deleteMessage(String messageId);
-//
-//    List<Message> findBySenderAndReceiverOrderBySentAtAsc(User sender, User receiver);
-//
-//    List<Message> findByReceiverOrderBySentAtDesc(User receiver);
-//}
+package com.example.test1.mapper;
+
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.test1.entity.Message;
+import org.apache.ibatis.annotations.*;
+
+import java.util.List;
+
+@Mapper
+public interface MessageMapper extends BaseMapper<Message> {
+
+    @Insert("INSERT INTO private_message (message_id, sender_id, receiver_id, content, create_time, is_read) " +
+            "VALUES (#{messageId}, #{senderId}, #{receiverId}, #{content}, #{createTime}, #{isRead})")
+    int insertMessage(Message message);
+
+    @Select("SELECT * FROM private_message WHERE receiver_id = #{userId} ORDER BY create_time DESC LIMIT #{offset}, #{limit}")
+    List<Message> selectByReceiverId(@Param("userId") String userId, @Param("offset") int offset, @Param("limit") int limit);
+
+    @Select("SELECT * FROM private_message WHERE sender_id = #{userId} OR receiver_id = #{userId} ORDER BY create_time DESC LIMIT #{offset}, #{limit}")
+    List<Message> selectByUserId(@Param("userId") String userId, @Param("offset") int offset, @Param("limit") int limit);
+
+    @Update("UPDATE private_message SET is_read = true WHERE receiver_id = #{userId} AND message_id = #{messageId}")
+    int markAsRead(@Param("userId") String userId, @Param("messageId") String messageId);
+}
