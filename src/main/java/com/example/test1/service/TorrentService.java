@@ -130,7 +130,7 @@ public class TorrentService {
 
         // 2. 关联User对象
         if (torrent.getOwnerId() != null) {
-            Optional<User> user = userMapper.selectByUserId(torrent.getOwnerId());
+            User user = userMapper.selectByUserId(torrent.getOwnerId());
             // 这里可以根据需要设置User对象到Torrent中
             // 如果Torrent类中有User字段可以设置
             // torrent.setUser(user);
