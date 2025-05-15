@@ -1,10 +1,10 @@
 package com.example.test1.service;
 
 import com.example.test1.entity.Torrent;
-import com.example.test1.entity.Owner;
+import com.example.test1.entity.User;
 import com.example.test1.exception.TorrentProcessingException;
 import com.example.test1.mapper.TorrentMapper;
-import com.example.test1.mapper.OwnerMapper;
+import com.example.test1.mapper.UserMapper;
 import com.example.test1.util.TorrentFileParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class TorrentService {
     private TorrentMapper torrentMapper;
 
     @Autowired
-    private OwnerMapper ownerMapper;
+    private UserMapper userMapper;
 
     /**
      * 处理种子上传并保存到数据库
@@ -41,7 +41,7 @@ public class TorrentService {
             Torrent torrent = buildTorrentEntity(file, meta, category, description, principal);
 
             // 3. 保存到数据库
-            saveTorrentWithOwner(torrent);
+            saveTorrentWithUser(torrent);
 
             return torrent;
         } catch (IOException e) {
@@ -116,19 +116,21 @@ public class TorrentService {
     }
 
     /**
-     * 保存Torrent并关联Owner
+     * 保存Torrent并关联User
      */
-    private void saveTorrentWithOwner(Torrent torrent) {
+    private void saveTorrentWithUser(Torrent torrent) {
         // 1. 保存Torrent
-        int affectedRows = torrentMapper.insert(torrent); // 使用MyBatis-Plus的insert方法
+        int affectedRows = torrentMapper.insert(torrent);
         if (affectedRows != 1) {
             throw new TorrentProcessingException("种子保存失败");
         }
 
-        // 2. 关联Owner对象
+        // 2. 关联User对象
         if (torrent.getOwnerId() != null) {
-            Owner owner = ownerMapper.selectById(torrent.getOwnerId());
-            torrent.setOwner(owner);
+            User user = userMapper.selectById(torrent.getOwnerId());
+            // 这里可以根据需要设置User对象到Torrent中
+            // 如果Torrent类中有User字段可以设置
+            // torrent.setUser(user);
         }
     }
 
