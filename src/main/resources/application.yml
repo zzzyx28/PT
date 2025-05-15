@@ -10,3 +10,4 @@ spring:
         hibernate:
             ddl-auto: update  # 可选，自动更新表结构
         show-sql: true      # 可选，显示SQL日志
+

@@ -15,14 +15,12 @@ import java.time.LocalDateTime;
  * @email
  * @date 2025-04-20
  */
-<<<<<<< HEAD
+
 
 @Data
 @TableName("comment")
-=======
-@Entity
-@Table(name = "comment")
->>>>>>> a1f2ff4f9bea80cc065a6a9f7d7f3e9a67a19c6b
+
+
 public class Comment {
     @Id
     private String commentId;

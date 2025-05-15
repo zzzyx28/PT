@@ -2,6 +2,7 @@ package com.example.test1.service;
 
 import com.example.test1.entity.Torrent;
 import com.example.test1.entity.User;
+import com.example.test1.exception.BencodeException;
 import com.example.test1.exception.TorrentProcessingException;
 import com.example.test1.mapper.TorrentMapper;
 import com.example.test1.mapper.UserMapper;
@@ -14,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.security.Principal;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -65,40 +67,38 @@ public class TorrentService {
     /**
      * 构建Torrent实体对象
      */
-    private Torrent buildTorrentEntity(MultipartFile file,
-                                       TorrentFileParser.TorrentMeta meta,
-                                       Integer category,
-                                       String description,
-                                       Principal principal) {
+    public Torrent buildTorrentEntity(MultipartFile file,
+                                      TorrentFileParser.TorrentMeta meta,
+                                      Integer category,
+                                      String description,
+                                      Principal principal) {
         Torrent torrent = new Torrent();
 
-        // 基础信息
+        // 设置数据库存在的字段
         torrent.setTorrentId(UUID.randomUUID().toString());
-        torrent.setInfoHash(meta.getInfoHash());
         torrent.setName(meta.getName());
         torrent.setFilename(file.getOriginalFilename());
+        torrent.setTitle(meta.getName()); // 如果没有标题，用name代替
         torrent.setDescription(description);
-
-        // 分类与状态
-        torrent.setCategory(category);
         torrent.setStatus(Torrent.Status.CANDIDATE);
-        torrent.setFileStatus(0); // 0=未上传
-
-        // 文件信息
-        torrent.setSize(meta.getTotalSize());
-        torrent.setFileCount(meta.getFileCount());
         torrent.setType(meta.isSingleFile() ? 1 : 2);
+        torrent.setOwnerId(getUserIdFromPrincipal(principal));
 
-        // 时间信息
+        // 设置时间（自动转换为String）
         torrent.setCreateTime(LocalDateTime.now());
         torrent.setUpdateTime(LocalDateTime.now());
 
-        // 用户关联
-        String userId = getUserIdFromPrincipal(principal);
-        torrent.setOwnerId(userId);
-
         // 初始化统计字段
-        initStatisticsFields(torrent);
+        torrent.setComments(0);
+        torrent.setViews(0);
+        torrent.setLeechers(0);
+        torrent.setSeeders(0);
+        torrent.setCompletions(0);
+
+        // 非数据库字段（可选存储到其他表或忽略）
+        torrent.setInfoHash(meta.getInfoHash()); // @TableField(exist=false)
+        torrent.setSize(meta.getTotalSize());    // @TableField(exist=false)
+        torrent.setFileCount(meta.getFileCount());// @TableField(exist=false)
 
         return torrent;
     }
@@ -109,7 +109,6 @@ public class TorrentService {
     private void initStatisticsFields(Torrent torrent) {
         torrent.setComments(0);
         torrent.setViews(0);
-        torrent.setHits(0);
         torrent.setLeechers(0);
         torrent.setSeeders(0);
         torrent.setCompletions(0);
@@ -127,7 +126,7 @@ public class TorrentService {
 
         // 2. 关联User对象
         if (torrent.getOwnerId() != null) {
-            User user = userMapper.selectById(torrent.getOwnerId());
+            Optional<User> user = userMapper.selectByUserId(torrent.getOwnerId());
             // 这里可以根据需要设置User对象到Torrent中
             // 如果Torrent类中有User字段可以设置
             // torrent.setUser(user);
