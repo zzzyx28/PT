@@ -21,7 +21,7 @@ public class User {
     private Integer magicValue;
 
     @TableField("is_email_verified")
-    private Boolean emailVerified;
+    private int emailVerified;
 
     @TableField("invite_code")
     private String inviteCode;
@@ -103,11 +103,11 @@ public class User {
         this.magicValue = magicValue;
     }
 
-    public Boolean getEmailVerified() {
+    public int getEmailVerified() {
         return emailVerified;
     }
 
-    public void setEmailVerified(Boolean emailVerified) {
+    public void setEmailVerified(int emailVerified) {
         this.emailVerified = emailVerified;
     }
 
@@ -127,7 +127,7 @@ public class User {
         this.createdAt = createdAt;
     }
 
-    public boolean isEmailVerified() {
+    public int isEmailVerified() {
         return emailVerified;
     }
 }

@@ -51,7 +51,7 @@ public class UserService {
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(PasswordUtils.hash(password));
-        user.setEmailVerified(false); // 注册后邮箱未验证
+        user.setEmailVerified(0); // 注册后邮箱未验证
         user.setLevel(1);
         user.setExperience(0L);
         user.setMagicValue(0);
@@ -93,12 +93,12 @@ public class UserService {
             throw new UserException("用户不存在");
         }
 
-        if (user.isEmailVerified()) {
+        if (user.isEmailVerified()==1) {
             emailVerificationTokenMapper.deleteByToken(token);
             throw new UserException("该邮箱已验证");
         }
 
-        user.setEmailVerified(true);
+        user.setEmailVerified(1);
         userMapper.updateById(user);
 
         emailVerificationTokenMapper.deleteByToken(token);
@@ -113,7 +113,7 @@ public class UserService {
             throw new UserException("邮箱或密码错误");
         }
 
-        if (!user.isEmailVerified()) {
+        if (user.isEmailVerified() != 1) {
             throw new UserException("邮箱尚未验证，请先完成邮箱验证  "+user.isEmailVerified());
         }
 
