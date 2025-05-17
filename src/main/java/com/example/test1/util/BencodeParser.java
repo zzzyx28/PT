@@ -1,18 +1,11 @@
 package com.example.test1.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class BencodeParser {
-
     private final InputStream in;
     private int lookahead = -1;
 
@@ -22,6 +15,16 @@ public class BencodeParser {
 
     public Object parse() throws IOException {
         lookahead = in.read();
+
+        // 跳过 UTF-8 BOM（EF BB BF）
+        if (lookahead == 0xEF) {
+            if (in.read() == 0xBB && in.read() == 0xBF) {
+                lookahead = in.read();
+            } else {
+                throw new IOException("Invalid BOM in file");
+            }
+        }
+
         return parseValue();
     }
 
@@ -34,39 +37,59 @@ public class BencodeParser {
             return parseNumber();
         } else if (Character.isDigit(lookahead)) {
             return parseString();
+        } else {
+            throw new IOException("Invalid bencode format at lookahead: " + lookahead + " ('" + (char) lookahead + "')");
         }
-        throw new IOException("Invalid bencode format");
     }
 
     private Map<String, Object> parseDictionary() throws IOException {
-        Map<String, Object> dict = new HashMap<>();
-        in.read(); // consume 'd'
-        while ((lookahead = in.read()) != 'e') {
+        Map<String, Object> dict = new LinkedHashMap<>();
+        if (lookahead != 'd') {
+            throw new IOException("Expected 'd' at beginning of dictionary");
+        }
+        lookahead = in.read(); // consume 'd'
+
+        while (lookahead != 'e') {
             String key = parseString();
             Object value = parseValue();
             dict.put(key, value);
         }
-        in.read(); // consume 'e'
+
+        lookahead = in.read(); // consume 'e'
         return dict;
     }
 
     private List<Object> parseList() throws IOException {
         List<Object> list = new ArrayList<>();
-        in.read(); // consume 'l'
-        while ((lookahead = in.read()) != 'e') {
+        if (lookahead != 'l') {
+            throw new IOException("Expected 'l' at beginning of list");
+        }
+        lookahead = in.read(); // consume 'l'
+
+        while (lookahead != 'e') {
             list.add(parseValue());
         }
-        in.read(); // consume 'e'
+
+        lookahead = in.read(); // consume 'e'
         return list;
     }
 
     private long parseNumber() throws IOException {
-        in.read(); // consume 'i'
-        StringBuilder sb = new StringBuilder();
-        while ((lookahead = in.read()) != 'e') {
-            sb.append((char) lookahead);
+        if (lookahead != 'i') {
+            throw new IOException("Expected 'i' at beginning of number");
         }
-        in.read(); // consume 'e'
+        lookahead = in.read(); // consume 'i'
+
+        StringBuilder sb = new StringBuilder();
+        while (lookahead != 'e') {
+            if (lookahead == -1) {
+                throw new EOFException("Unexpected end of input while parsing number");
+            }
+            sb.append((char) lookahead);
+            lookahead = in.read();
+        }
+
+        lookahead = in.read(); // consume 'e'
         return Long.parseLong(sb.toString());
     }
 
@@ -76,24 +99,37 @@ public class BencodeParser {
             length = length * 10 + (lookahead - '0');
             lookahead = in.read();
         }
+
         if (lookahead != ':') {
-            throw new IOException("Invalid string length");
+            throw new IOException("Expected ':' after string length");
         }
-        in.read(); // consume ':'
-        byte[] bytes = new byte[length];
-        int read = in.read(bytes);
-        if (read != length) {
-            throw new IOException("Unexpected end of string");
+
+        byte[] buf = new byte[length];
+        int bytesRead = in.read(buf);
+        if (bytesRead != length) {
+            throw new IOException("Unexpected end of stream when reading string");
         }
-        return new String(bytes, StandardCharsets.ISO_8859_1);
+
+        lookahead = in.read(); // prepare for next token
+        return new String(buf, StandardCharsets.ISO_8859_1); // 原始字节序列（非UTF-8）
     }
 
+    // 获取 SHA-1（例如计算 info hash）
     public static byte[] calculateSHA1(byte[] data) {
         try {
             MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
             return sha1.digest(data);
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("SHA-1 not available", e);
+        } catch (Exception e) {
+            throw new RuntimeException("SHA-1 not supported", e);
         }
+    }
+
+    // 把 byte[] 转为 hex 字符串
+    public static String toHex(byte[] data) {
+        StringBuilder sb = new StringBuilder();
+        for (byte b : data) {
+            sb.append(String.format("%02x", b & 0xff));
+        }
+        return sb.toString();
     }
 }

@@ -53,8 +53,8 @@ public class Torrent {
     @TableField("completions")
     private Integer completions;
 
-    // 非数据库字段（业务逻辑需要）
-    @TableField(exist = false)
+
+    @TableField("info_hash")
     private byte[] infoHash;
 
     @TableField(exist = false)
@@ -62,6 +62,7 @@ public class Torrent {
 
     @TableField(exist = false)
     private Integer fileCount;
+
 
     // 状态常量
     public interface Status {

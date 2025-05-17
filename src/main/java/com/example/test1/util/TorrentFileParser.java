@@ -3,8 +3,7 @@ package com.example.test1.util;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TorrentFileParser {
 
@@ -29,30 +28,35 @@ public class TorrentFileParser {
     }
 
     public static TorrentMeta parse(byte[] torrentData) throws IOException {
+        // 1. 解析整个文件
         BencodeParser parser = new BencodeParser(new ByteArrayInputStream(torrentData));
         Map<String, Object> root = (Map<String, Object>) parser.parse();
         Map<String, Object> info = (Map<String, Object>) root.get("info");
 
-        // 计算 info_hash (SHA-1 hash of the info dictionary)
-        byte[] infoBytes = bencodeEncode(info);
+        // 2. 提取 info 字节范围
+        int infoStart = indexOf(torrentData, "4:info".getBytes(StandardCharsets.ISO_8859_1)) + 6;
+        int infoEnd = findEndOfBencode(torrentData, infoStart);
+        byte[] infoBytes = Arrays.copyOfRange(torrentData, infoStart, infoEnd);
+
+        // 3. 计算 infoHash
         byte[] infoHash = BencodeParser.calculateSHA1(infoBytes);
 
+        // 4. 提取基础信息
         TorrentMeta meta = new TorrentMeta();
         meta.setInfoHash(infoHash);
         meta.setName((String) info.get("name"));
 
-        // 计算总大小和文件数量
+        // 5. 文件信息
         if (info.containsKey("length")) {
-            // 单文件
             meta.setTotalSize((Long) info.get("length"));
             meta.setFileCount(1);
             meta.setSingleFile(true);
-        } else {
-            // 多文件
+        } else if (info.containsKey("files")) {
             List<Map<String, Object>> files = (List<Map<String, Object>>) info.get("files");
-            long totalSize = files.stream()
-                    .mapToLong(file -> (Long) file.get("length"))
-                    .sum();
+            long totalSize = 0;
+            for (Map<String, Object> file : files) {
+                totalSize += (Long) file.get("length");
+            }
             meta.setTotalSize(totalSize);
             meta.setFileCount(files.size());
             meta.setSingleFile(false);
@@ -61,34 +65,49 @@ public class TorrentFileParser {
         return meta;
     }
 
-    // 简单的 Bencode 编码实现（仅用于编码 info 字典）
-    private static byte[] bencodeEncode(Map<String, Object> map) {
-        StringBuilder sb = new StringBuilder("d");
-        for (Map.Entry<String, Object> entry : map.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
-            sb.append(key.length()).append(":").append(key);
-            if (value instanceof Long) {
-                sb.append("i").append(value).append("e");
-            } else if (value instanceof String) {
-                String s = (String) value;
-                sb.append(s.length()).append(":").append(s);
-            } else if (value instanceof byte[]) {
-                byte[] bytes = (byte[]) value;
-                sb.append(bytes.length).append(":").append(new String(bytes, StandardCharsets.ISO_8859_1));
-            } else if (value instanceof List) {
-                sb.append("l");
-                for (Object item : (List<?>) value) {
-                    if (item instanceof Map) {
-                        sb.append(new String(bencodeEncode((Map<String, Object>) item), StandardCharsets.ISO_8859_1));
-                    }
+    // 在 data 中查找 pattern 的起始位置
+    private static int indexOf(byte[] data, byte[] pattern) {
+        outer:
+        for (int i = 0; i <= data.length - pattern.length; i++) {
+            for (int j = 0; j < pattern.length; j++) {
+                if (data[i + j] != pattern[j]) {
+                    continue outer;
                 }
-                sb.append("e");
-            } else if (value instanceof Map) {
-                sb.append(new String(bencodeEncode((Map<String, Object>) value), StandardCharsets.ISO_8859_1));
+            }
+            return i;
+        }
+        return -1;
+    }
+
+    // 从某个位置开始，找到完整 Bencode 的结束位置（只针对 info 字典）
+    private static int findEndOfBencode(byte[] data, int start) {
+        int i = start;
+        int depth = 0;
+        while (i < data.length) {
+            byte b = data[i];
+            if (b == 'd' || b == 'l') {
+                depth++;
+                i++;
+            } else if (b == 'e') {
+                depth--;
+                i++;
+                if (depth == 0) break;
+            } else if (b == 'i') {
+                i++;
+                while (data[i] != 'e') i++;
+                i++; // consume 'e'
+            } else if (b >= '0' && b <= '9') {
+                int len = 0;
+                while (data[i] >= '0' && data[i] <= '9') {
+                    len = len * 10 + (data[i] - '0');
+                    i++;
+                }
+                i++; // skip ':'
+                i += len; // skip string content
+            } else {
+                throw new RuntimeException("Unknown bencode format at: " + i);
             }
         }
-        sb.append("e");
-        return sb.toString().getBytes(StandardCharsets.ISO_8859_1);
+        return i;
     }
 }

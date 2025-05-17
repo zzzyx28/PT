@@ -24,7 +24,8 @@ import java.util.UUID;
 
 @Service
 public class TorrentService {
-
+    @Autowired
+    private TorrentPersistenceService torrentPersistenceService;
     @Autowired
     private TorrentMapper torrentMapper;
 
@@ -39,15 +40,17 @@ public class TorrentService {
                                         Integer category,
                                         String description,
                                         Principal principal) {
+        System.out.println("文件名：" + file.getOriginalFilename());
+        System.out.println("文件大小：" + file.getSize());
         try {
             // 1. 解析种子文件
             TorrentFileParser.TorrentMeta meta = parseTorrentFile(file);
-
+            System.out.println(meta.getInfoHash());
             // 2. 构建Torrent对象
             Torrent torrent = buildTorrentEntity(file, meta, category, description, principal);
 
             // 3. 保存到数据库
-            saveTorrentWithUser(torrent);
+            torrentPersistenceService.saveTorrent(torrent);
 
             return torrent;
         } catch (IOException e) {
@@ -65,8 +68,17 @@ public class TorrentService {
         if (file.isEmpty()) {
             throw new IllegalArgumentException("上传文件不能为空");
         }
-        return TorrentFileParser.parse(file.getBytes());
+
+        try {
+            byte[] bytes = file.getBytes();
+            return TorrentFileParser.parse(bytes);
+        } catch (IOException e) {
+            System.err.println("[读取失败] 文件名：" + file.getOriginalFilename());
+            e.printStackTrace();
+            throw e;
+        }
     }
+
 
     /**
      * 构建Torrent实体对象
@@ -79,14 +91,15 @@ public class TorrentService {
         Torrent torrent = new Torrent();
 
         // 设置数据库存在的字段
-        torrent.setTorrentId(UUID.randomUUID().toString());
+
+        torrent.setTorrentId("");
         torrent.setName(meta.getName());
         torrent.setFilename(file.getOriginalFilename());
         torrent.setTitle(meta.getName()); // 如果没有标题，用name代替
         torrent.setDescription(description);
         torrent.setStatus(Torrent.Status.CANDIDATE);
         torrent.setType(meta.isSingleFile() ? 1 : 2);
-        torrent.setOwnerId(getUserIdFromPrincipal(principal));
+//        torrent.setOwnerId(getUserIdFromPrincipal(principal));
 
         // 设置时间（自动转换为String）
         torrent.setCreateTime(LocalDateTime.now());
@@ -118,10 +131,8 @@ public class TorrentService {
         torrent.setCompletions(0);
     }
 
-    /**
-     * 保存Torrent并关联User
-     */
-    private void saveTorrentWithUser(Torrent torrent) {
+    @Transactional
+   public void saveTorrentWithUser(Torrent torrent) {
         // 1. 保存Torrent
         int affectedRows = torrentMapper.insert(torrent);
         if (affectedRows != 1) {

@@ -6,7 +6,10 @@ spring:
         url: jdbc:mysql://rm-bp157o1t88nfl189jjo.mysql.rds.aliyuncs.com:3306/pt?serverTimezone=Asia/Shanghai&useSSL=false
         username: root
         password: Gu1152505423
-
+    servlet:
+        multipart:
+            max-file-size: 50MB
+            max-request-size: 50MB
 mybatis-plus:
     configuration:
         log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 可选，开启SQL日志
