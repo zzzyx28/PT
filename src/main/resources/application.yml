@@ -7,6 +7,18 @@ spring:
         username: root
         password: Gu1152505423
 
+    mail:
+        host: smtp.gmail.com
+        port: 465
+        username: yxzheng28@gmail.com
+        password: bfodxhvwvkvhwnrg
+        protocol: smtp
+        properties:
+            mail.smtp.auth: true
+            mail.smtp.ssl.enable: true
+            mail.smtp.socketFactoryClass: javax.net.ssl.SSLSocketFactory
+
+
 mybatis-plus:
     configuration:
         log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 可选，开启SQL日志
@@ -15,3 +27,4 @@ mybatis-plus:
     global-config:
         db-config:
             id-type: assign_uuid
+
