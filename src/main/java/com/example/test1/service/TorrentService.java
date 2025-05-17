@@ -1,5 +1,8 @@
 package com.example.test1.service;
-
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.example.test1.entity.Torrent;
@@ -9,6 +12,7 @@ import com.example.test1.exception.TorrentProcessingException;
 import com.example.test1.mapper.TorrentMapper;
 import com.example.test1.mapper.UserMapper;
 import com.example.test1.util.TorrentFileParser;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.stereotype.Service;
@@ -16,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,14 +31,47 @@ import java.util.UUID;
 
 @Service
 public class TorrentService {
+    // 硬编码存储路径 (可根据需要修改)
+    private static final String TORRENT_STORAGE_PATH = "./torrent-storage";
+    private final Path storagePath = Paths.get(TORRENT_STORAGE_PATH);
+
     @Autowired
     private TorrentPersistenceService torrentPersistenceService;
     @Autowired
     private TorrentMapper torrentMapper;
-
     @Autowired
     private UserMapper userMapper;
 
+    @PostConstruct
+    public void init() throws IOException {
+        // 确保存储目录存在
+        if (!Files.exists(storagePath)) {
+            Files.createDirectories(storagePath);
+        }
+    }
+
+    public Resource downloadTorrent(String torrentId) throws IOException {
+        // 1. 查询种子信息
+        Torrent torrent = torrentMapper.selectById(torrentId);
+        if (torrent == null) {
+            throw new TorrentProcessingException("种子不存在");
+        }
+
+        // 2. 构建文件路径
+        Path filePath = Paths.get(torrent.getStoragePath());
+        if (!Files.exists(filePath)) {
+            throw new TorrentProcessingException("种子文件不存在");
+        }
+
+        // 3. 返回可下载的资源
+        torrent.setCompletions(torrent.getCompletions() + 1);
+        torrentMapper.incrementCompletions(torrentId);
+        return new InputStreamResource(Files.newInputStream(filePath));
+    }
+
+    public String getTorrentContentType() {
+        return "application/x-bittorrent"; // 标准种子文件类型
+    }
     /**
      * 处理种子上传并保存到数据库
      */
@@ -39,25 +79,55 @@ public class TorrentService {
     public Torrent uploadAndSaveTorrent(MultipartFile file,
                                         Integer category,
                                         String description,
-                                        Principal principal) {
-        System.out.println("文件名：" + file.getOriginalFilename());
-        System.out.println("文件大小：" + file.getSize());
+                                        Principal principal,
+                                        String uid) {
         try {
-            // 1. 解析种子文件
+            // 1. 验证文件
+            validateFile(file);
+
+            // 2. 解析种子文件
             TorrentFileParser.TorrentMeta meta = parseTorrentFile(file);
-            System.out.println(meta.getInfoHash());
-            // 2. 构建Torrent对象
-            Torrent torrent = buildTorrentEntity(file, meta, category, description, principal);
 
-            // 3. 保存到数据库
+            // 3. 保存文件到本地存储
+            String path=saveTorrentFile(file);
+
+            // 4. 构建并保存Torrent实体
+            System.out.println(path);
+            Torrent torrent = buildTorrentEntity(file, meta, category, description, principal,path,uid);
             torrentPersistenceService.saveTorrent(torrent);
-
             return torrent;
         } catch (IOException e) {
-            throw new TorrentProcessingException("种子文件读取失败", e);
+            throw new TorrentProcessingException("种子文件处理失败", e);
         } catch (BencodeException e) {
             throw new TorrentProcessingException("无效的种子文件格式", e);
         }
+    }
+
+    /**
+     * 验证上传文件
+     */
+    private void validateFile(MultipartFile file) {
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("上传文件不能为空");
+        }
+        if (!file.getOriginalFilename().toLowerCase().endsWith(".torrent")) {
+            throw new IllegalArgumentException("仅支持.torrent文件");
+        }
+    }
+
+    /**
+     * 保存种子文件到本地存储
+     */
+    private String saveTorrentFile(MultipartFile file) throws IOException {
+        // 生成唯一文件名（避免冲突）
+        String uniqueFilename = UUID.randomUUID() + "_" + file.getOriginalFilename();
+        Path targetPath = storagePath.resolve(uniqueFilename);
+
+        Files.copy(file.getInputStream(), targetPath);
+
+        // 返回相对路径或绝对路径（根据需求选择）
+        return targetPath.toString(); // 返回绝对路径
+        // 或者 return uniqueFilename; // 只返回文件名
     }
 
     /**
@@ -65,20 +135,8 @@ public class TorrentService {
      */
     private TorrentFileParser.TorrentMeta parseTorrentFile(MultipartFile file)
             throws IOException, BencodeException {
-        if (file.isEmpty()) {
-            throw new IllegalArgumentException("上传文件不能为空");
-        }
-
-        try {
-            byte[] bytes = file.getBytes();
-            return TorrentFileParser.parse(bytes);
-        } catch (IOException e) {
-            System.err.println("[读取失败] 文件名：" + file.getOriginalFilename());
-            e.printStackTrace();
-            throw e;
-        }
+        return TorrentFileParser.parse(file.getBytes());
     }
-
 
     /**
      * 构建Torrent实体对象
@@ -87,35 +145,39 @@ public class TorrentService {
                                       TorrentFileParser.TorrentMeta meta,
                                       Integer category,
                                       String description,
-                                      Principal principal) {
+                                      Principal principal,
+                                      String storagePath,
+                                      String uid) {
+        System.out.println(storagePath);
         Torrent torrent = new Torrent();
 
-        // 设置数据库存在的字段
-
-        torrent.setTorrentId("");
+        // 设置基础信息
+        torrent.setTorrentId(UUID.randomUUID().toString());
         torrent.setName(meta.getName());
         torrent.setFilename(file.getOriginalFilename());
-        torrent.setTitle(meta.getName()); // 如果没有标题，用name代替
+        torrent.setTitle(meta.getName());
         torrent.setDescription(description);
+        torrent.setCategory(category);
+        torrent.setStoragePath(storagePath);
+        System.out.println(torrent.getStoragePath());
+
+        // 设置状态信息
         torrent.setStatus(Torrent.Status.CANDIDATE);
         torrent.setType(meta.isSingleFile() ? 1 : 2);
-//        torrent.setOwnerId(getUserIdFromPrincipal(principal));
+        torrent.setOwnerId(uid);
+        System.out.println(torrent.getOwnerId());
 
-        // 设置时间（自动转换为String）
+        // 设置文件信息
+        torrent.setSize(meta.getTotalSize());
+        torrent.setFileCount(meta.getFileCount());
+        torrent.setInfoHash(meta.getInfoHash());
+
+        // 设置时间戳
         torrent.setCreateTime(LocalDateTime.now());
         torrent.setUpdateTime(LocalDateTime.now());
 
         // 初始化统计字段
-        torrent.setComments(0);
-        torrent.setViews(0);
-        torrent.setLeechers(0);
-        torrent.setSeeders(0);
-        torrent.setCompletions(0);
-
-        // 非数据库字段（可选存储到其他表或忽略）
-        torrent.setInfoHash(meta.getInfoHash()); // @TableField(exist=false)
-        torrent.setSize(meta.getTotalSize());    // @TableField(exist=false)
-        torrent.setFileCount(meta.getFileCount());// @TableField(exist=false)
+        initStatisticsFields(torrent);
 
         return torrent;
     }
@@ -164,5 +226,27 @@ public class TorrentService {
         Page<Torrent> pageRequest = new Page<>(page, size);
         Page<Torrent> resultPage = torrentMapper.selectPage(pageRequest, new QueryWrapper<>());
         return resultPage.getRecords();
+    }
+
+    public Torrent getTorrentById(String torrentId) {
+        // 使用MyBatis-Plus的selectById方法
+        Torrent torrent = torrentMapper.selectById(torrentId);
+
+        // 可选：增加统计字段（如浏览次数+1）
+        if (torrent != null) {
+            torrent.setViews(torrent.getViews() + 1);
+            torrentMapper.incrementViews(torrentId);
+        }
+
+        return torrent;
+    }
+
+    public Page<Torrent> listByOwnerId(String ownerId, int pageNum, int pageSize) {
+        Page<Torrent> page = new Page<>(pageNum, pageSize);
+        return torrentMapper.selectByOwnerId(page, ownerId);
+    }
+
+    public List<Torrent> listByOwnerWithCondition(String ownerId, String category, String orderBy) {
+        return torrentMapper.selectByOwnerIdXml(ownerId);
     }
 }

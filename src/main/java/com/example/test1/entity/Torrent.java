@@ -32,7 +32,7 @@ public class Torrent {
     @TableField("updateTime")
     private String updateTime;
 
-    @TableField("ownerId")
+    @TableField("owner_id")
     private String ownerId;
 
     @TableField("type")
@@ -50,6 +50,9 @@ public class Torrent {
     @TableField("seeders")
     private Integer seeders;
 
+    @TableField("storage_path")
+    private String storagePath;
+
     @TableField("completions")
     private Integer completions;
 
@@ -62,6 +65,10 @@ public class Torrent {
 
     @TableField(exist = false)
     private Integer fileCount;
+
+    public void setCategory(Integer category) {
+        this.type = category;
+    }
 
 
     // 状态常量
@@ -101,7 +108,13 @@ public class Torrent {
     public String getTitle() {
         return title;
     }
+    public String getStoragePath() {
+        return storagePath;
+    }
 
+    public void setStoragePath(String storagePath) {
+        this.storagePath = storagePath;
+    }
     public void setTitle(String title) {
         this.title = title;
     }

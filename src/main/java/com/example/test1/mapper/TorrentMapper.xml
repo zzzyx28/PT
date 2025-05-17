@@ -1,0 +1,16 @@
+<!-- resources/mapper/TorrentMapper.xml -->
+<select id="selectByOwnerId" resultType="com.example.test1.entity.Torrent">
+    SELECT * FROM torrent
+    WHERE owner_id = #{ownerId}
+    ORDER BY create_time DESC
+</select>
+
+        <!-- 带条件的分页查询 -->
+<select id="selectByOwnerIdXml" resultType="com.example.test1.entity.Torrent">
+SELECT * FROM torrent
+WHERE owner_id = #{ownerId}
+<if test="category != null">
+    AND category = #{category}
+</if>
+ORDER BY ${orderBy}
+</select>

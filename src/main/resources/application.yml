@@ -6,10 +6,26 @@ spring:
         url: jdbc:mysql://rm-bp157o1t88nfl189jjo.mysql.rds.aliyuncs.com:3306/pt?serverTimezone=Asia/Shanghai&useSSL=false
         username: root
         password: Gu1152505423
+
     servlet:
         multipart:
             max-file-size: 50MB
             max-request-size: 50MB
+
+
+    mail:
+        host: smtp.gmail.com
+        port: 465
+        username: yxzheng28@gmail.com
+        password: bfodxhvwvkvhwnrg
+        protocol: smtp
+        properties:
+            mail.smtp.auth: true
+            mail.smtp.ssl.enable: true
+            mail.smtp.socketFactoryClass: javax.net.ssl.SSLSocketFactory
+
+
+
 mybatis-plus:
     configuration:
         log-impl: org.apache.ibatis.logging.stdout.StdOutImpl # 可选，开启SQL日志
@@ -18,3 +34,12 @@ mybatis-plus:
     global-config:
         db-config:
             id-type: assign_uuid
+
+app:
+  torrent:
+    storage:
+      path: /data/torrents  # 生产环境建议使用绝对路径
+      temp-path: /tmp/torrent-uploads
+    download:
+      max-concurrent: 100
+      rate-limit: 10MB/s

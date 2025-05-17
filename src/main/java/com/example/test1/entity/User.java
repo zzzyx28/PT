@@ -1,87 +1,133 @@
 package com.example.test1.entity;
 
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.Data;
-
+import com.baomidou.mybatisplus.annotation.*;
 import java.time.LocalDateTime;
 
-@Data
 @TableName("user")
 public class User {
 
-    @TableId(type = IdType.INPUT) // 若 userId 是由你控制（如UUID），使用 INPUT；自增用 AUTO
+    @TableId(value = "user_id", type = IdType.ASSIGN_UUID)
     private String userId;
 
-    @Schema(description = "userName")
-    private String userName;
-
-    @Schema(description = "头像")
-    private String avatar;
-
-    @Schema(description = "注册时间")
-    private LocalDateTime createTime;
-
-    @Schema(description = "昵称")
-    private String nickname;
-
-    @Schema(description = "性别 0男 1女 2其他")
-    private Integer gender;
-
-    @Schema(description = "状态 0正常 1已锁定 2未激活")
-    private Integer state;
-
-    @Schema(description = "email")
+    private String username;
     private String email;
+    private String password;
 
-    @Schema(description = "管理备注")
-    private String remark;
+    private String avatarUrl;
+    private String signature;
 
-    @Schema(description = "上次登录时间")
-    private LocalDateTime lastLogin;
-
-    @Schema(description = "上次访问时间")
-    private LocalDateTime lastAccess;
-
-    private LocalDateTime lastOffer;
-
-    @Schema(description = "隐私级别")
-    private Integer privacy;
-
+    private Long experience;
     private Integer level;
+    private Integer magicValue;
 
-    private Integer levelMax;
+    @TableField("is_email_verified")
+    private int emailVerified;
 
-    @Schema(description = "上传量")
-    private Long uploaded;
+    @TableField("invite_code")
+    private String inviteCode;
 
-    @Schema(description = "下载量")
-    private Long downloaded;
+    @TableField("created_at")
+    private LocalDateTime createdAt;
 
-    @Schema(description = "真实上传量")
-    private Long realUploaded;
+    // Getter and Setter...
 
-    @Schema(description = "真实下载量")
-    private Long realDownloaded;
+    public String getUserId() {
+        return userId;
+    }
 
-    @Schema(description = "做种时间")
-    private Long seedTime;
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
 
-    @Schema(description = "下载时间")
-    private Long leechTime;
+    public String getUsername() {
+        return username;
+    }
 
-    private Integer download;
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
-    private Integer upload;
+    public String getEmail() {
+        return email;
+    }
 
-    @Schema(description = "上家ID")
-    private Integer inviter;
+    public void setEmail(String email) {
+        this.email = email;
+    }
 
-    @Schema(description = "魔力积分")
-    private Long bonus;
+    public String getPassword() {
+        return password;
+    }
 
-    @Schema(description = "经验值")
-    private Long exp;
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getAvatarUrl() {
+        return avatarUrl;
+    }
+
+    public void setAvatarUrl(String avatarUrl) {
+        this.avatarUrl = avatarUrl;
+    }
+
+    public String getSignature() {
+        return signature;
+    }
+
+    public void setSignature(String signature) {
+        this.signature = signature;
+    }
+
+    public Long getExperience() {
+        return experience;
+    }
+
+    public void setExperience(Long experience) {
+        this.experience = experience;
+    }
+
+    public Integer getLevel() {
+        return level;
+    }
+
+    public void setLevel(Integer level) {
+        this.level = level;
+    }
+
+    public Integer getMagicValue() {
+        return magicValue;
+    }
+
+    public void setMagicValue(Integer magicValue) {
+        this.magicValue = magicValue;
+    }
+
+    public int getEmailVerified() {
+        return emailVerified;
+    }
+
+    public void setEmailVerified(int emailVerified) {
+        this.emailVerified = emailVerified;
+    }
+
+    public String getInviteCode() {
+        return inviteCode;
+    }
+
+    public void setInviteCode(String inviteCode) {
+        this.inviteCode = inviteCode;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public int isEmailVerified() {
+        return emailVerified;
+    }
 }
