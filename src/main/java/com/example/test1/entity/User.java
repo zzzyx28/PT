@@ -20,14 +20,23 @@ public class User {
     private Integer level;
     private Integer magicValue;
 
-    @TableField("is_email_verified")
-    private int emailVerified;
+    private int is_email_verified;
 
     @TableField("invite_code")
     private String inviteCode;
 
     @TableField("created_at")
     private LocalDateTime createdAt;
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    private String bio;
 
     // Getter and Setter...
 
@@ -103,12 +112,12 @@ public class User {
         this.magicValue = magicValue;
     }
 
-    public int getEmailVerified() {
-        return emailVerified;
+    public int getIs_email_verified() {
+        return is_email_verified;
     }
 
-    public void setEmailVerified(int emailVerified) {
-        this.emailVerified = emailVerified;
+    public void setIs_email_verified(int is_email_verified) {
+        this.is_email_verified = is_email_verified;
     }
 
     public String getInviteCode() {
@@ -128,6 +137,6 @@ public class User {
     }
 
     public int isEmailVerified() {
-        return emailVerified;
+        return is_email_verified;
     }
 }

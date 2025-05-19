@@ -7,6 +7,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+import java.util.Optional;
+
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/user")
@@ -58,11 +61,17 @@ public class UserController {
     // 修改密码
     @PostMapping("/change-password")
     public ResponseEntity<?> changePassword(
-            @RequestParam String userId,
+//            @RequestParam String userName,
             @RequestParam String oldPassword,
-            @RequestParam String newPassword) {
+            @RequestParam String newPassword,
+            Principal principal) {
         try {
-            userService.changePassword(userId, oldPassword, newPassword);
+
+            String userName = Optional.ofNullable(principal)
+                    .map(p -> p.getName())
+                    .orElse("test1");
+
+            userService.changePassword(userName, oldPassword, newPassword);
             return ResponseEntity.ok("密码修改成功");
         } catch (UserException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -80,6 +89,15 @@ public class UserController {
         }
     }
 
+    @PostMapping("/update-bio")
+    public ResponseEntity<?> updateBio(@RequestBody User user) {
+        try {
+            userService.updateBio(user);
+            return ResponseEntity.ok("个人简介更新成功");
+        } catch (UserException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
     // 获取用户信息
     @GetMapping("/{userId}")
     public ResponseEntity<?> getUserInfo(@PathVariable String userId) {

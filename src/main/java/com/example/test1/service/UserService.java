@@ -1,8 +1,6 @@
 package com.example.test1.service;
 
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.example.test1.entity.EmailVerificationToken;
-import com.example.test1.entity.InvitationCode;
 import com.example.test1.entity.User;
 import com.example.test1.exception.UserException;
 import com.example.test1.mapper.EmailVerificationTokenMapper;
@@ -14,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.security.Principal;
 import java.time.LocalDateTime;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -51,7 +47,12 @@ public class UserService {
         user.setUsername(username);
         user.setEmail(email);
         user.setPassword(PasswordUtils.hash(password));
-        user.setEmailVerified(0); // 注册后邮箱未验证
+
+
+//        user.setEmailVerified(0); // 注册后邮箱未验证
+        user.setIs_email_verified(1);
+
+        user.setInviteCode(inviteCode);
         user.setLevel(1);
         user.setExperience(0L);
         user.setMagicValue(0);
@@ -69,7 +70,10 @@ public class UserService {
         emailVerificationTokenMapper.insert(verificationToken);
 
         String verifyLink = "http://localhost:5173/api/user/verify-email?token=" + token;
-        emailUtils.sendVerificationEmail(email, verifyLink);
+
+
+        //-----------------网络问题先注释-----------------
+//        emailUtils.sendVerificationEmail(email, verifyLink);
 
         return user;
     }
@@ -98,7 +102,7 @@ public class UserService {
             throw new UserException("该邮箱已验证");
         }
 
-        user.setEmailVerified(1);
+        user.setIs_email_verified(1);
         userMapper.updateById(user);
 
         emailVerificationTokenMapper.deleteByToken(token);
@@ -109,12 +113,15 @@ public class UserService {
     public User login(String email, String password) {
         User user = userMapper.selectByEmail(email);
 
+        //  ------------测试-----------
+        user.setIs_email_verified(1);
+
         if (user == null || !PasswordUtils.check(password, user.getPassword())) {
             throw new UserException("邮箱或密码错误");
         }
 
         if (user.isEmailVerified() != 1) {
-            throw new UserException("邮箱尚未验证，请先完成邮箱验证  "+user.isEmailVerified());
+            throw new UserException("邮箱尚未验证，请先完成邮箱验证  "+user.getEmail()+"  "+user.isEmailVerified());
         }
 
         return user;
@@ -122,19 +129,26 @@ public class UserService {
 
     // 修改密码
     @Transactional(rollbackFor = Exception.class)
-    public void changePassword(String userId, String oldPassword, String newPassword) {
-        User user = userMapper.selectById(userId);
+    public void changePassword(String userName, String oldPassword, String newPassword) {
+        User user = userMapper.selectByUsername(userName);
         if (user == null || !PasswordUtils.check(oldPassword, user.getPassword())) {
             throw new UserException("旧密码错误");
         }
-        userMapper.updatePasswordById(userId, PasswordUtils.hash(newPassword));
+        userMapper.updatePasswordByUserName(userName, PasswordUtils.hash(newPassword));
     }
 
     // 修改资料
     @Transactional(rollbackFor = Exception.class)
     public void updateProfile(User user) {
-        userMapper.updateProfileById(user);
+        userMapper.updateProfileByUserId(user);
     }
+
+    //更新简介
+    @Transactional(rollbackFor = Exception.class)
+    public void updateBio(User user) {
+        userMapper.updateBioByUsername(user);
+    }
+
 
     // 增加经验
     public void addExperience(String userId, long amount) {

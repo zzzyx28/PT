@@ -23,11 +23,14 @@ public interface UserMapper extends BaseMapper<User> {
             "VALUES (#{userId}, #{username}, #{email}, #{password}, #{inviteCode}, NOW())")
     int insert(User user);
 
-    @Update("UPDATE user SET password = #{password} WHERE user_id = #{userId}")
-    int updatePasswordById(@Param("userId") String userId, @Param("password") String password);
+    @Update("UPDATE user SET password = #{password} WHERE username = #{username}")
+    int updatePasswordByUserName(@Param("username") String username, @Param("password") String password);
 
-    @Update("UPDATE user SET avatar_url = #{avatarUrl}, signature = #{signature} WHERE user_id = #{userId}")
-    int updateProfileById(User user);
+    @Update("UPDATE user SET avatar_url = #{avatarUrl}, signature = #{signature}, username=#{username}, bio = #{bio} WHERE user_id = #{userId}")
+    int updateProfileByUserId(User user);
+
+    @Update("UPDATE user SET bio = #{bio} WHERE username = #{username}")
+    int updateBioByUsername(User user);
 
     @Update("UPDATE user SET experience = experience + #{amount}, level = FLOOR((experience + #{amount}) / 1000) + 1 WHERE user_id = #{userId}")
     int addExperience(@Param("userId") String userId, @Param("amount") long amount);

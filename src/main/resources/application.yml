@@ -14,15 +14,18 @@ spring:
 
 
     mail:
-        host: smtp.gmail.com
+        host: smtp.qq.com
+#        port: 587
         port: 465
-        username: yxzheng28@gmail.com
-        password: bfodxhvwvkvhwnrg
+#        username: yxzheng28@gmail.com
+        username: 2240783387@qq.com
+#        password: hiwqumaccwyybctx
+        password: nhvjhwiwnbxweacf
         protocol: smtp
         properties:
             mail.smtp.auth: true
             mail.smtp.ssl.enable: true
-            mail.smtp.socketFactoryClass: javax.net.ssl.SSLSocketFactory
+
 
 
 
