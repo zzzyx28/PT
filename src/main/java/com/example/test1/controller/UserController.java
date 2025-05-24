@@ -44,6 +44,7 @@ public class UserController {
         } catch (UserException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+
     }
 
     // 登录

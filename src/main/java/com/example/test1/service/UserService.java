@@ -55,7 +55,7 @@ public class UserService {
         user.setInviteCode(inviteCode);
         user.setLevel(1);
         user.setExperience(0L);
-        user.setMagicValue(0);
+        user.setMagic_value(0);
 
         userMapper.insert(user);
 
