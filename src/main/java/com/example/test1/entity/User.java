@@ -141,6 +141,15 @@ public class User {
         return is_email_verified;
     }
 
+    private int isBanned; // 0: 未封禁, 1: 已封禁
+
+    public int getIsBanned() {
+        return isBanned;
+    }
+
+    public void setIsBanned(int isBanned) {
+        this.isBanned = isBanned;
+    }
     private String phone;
     private int isPhoneVerified;
 

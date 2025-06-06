@@ -1,6 +1,7 @@
 package com.example.test1.service;
 
 import com.example.test1.entity.EmailVerificationToken;
+import com.example.test1.entity.InvitationCode;
 import com.example.test1.entity.PhoneVerificationToken;
 import com.example.test1.entity.User;
 import com.example.test1.exception.UserException;
@@ -168,6 +169,11 @@ public class UserService {
         //  ------------测试-----------
         user.setIs_email_verified(1);
 
+        if (user.getIsBanned() == 1) {
+            throw new UserException("该账号已被封禁，请联系管理员");
+        }
+
+
         if (user == null || !PasswordUtils.check(password, user.getPassword())) {
             throw new UserException("邮箱或密码错误");
         }
@@ -214,5 +220,60 @@ public class UserService {
 
     public User getUserById(String userId) {
         return userMapper.selectByUserId(userId);
+    }
+
+    /**
+     * 封禁用户账号
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void banUser(String userId) {
+        if (userMapper.checkIfBanned(userId) == 1) {
+            throw new UserException("该账号已被封禁");
+        }
+        userMapper.updateBanStatus(userId, 1); // 设置为封禁状态
+    }
+
+    /**
+     * 解禁用户账号
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void unbanUser(String userId) {
+        if (userMapper.checkIfBanned(userId) == 0) {
+            throw new UserException("该账号未被封禁");
+        }
+        userMapper.updateBanStatus(userId, 0); // 设置为非封禁状态
+    }
+
+    /**
+     * 创建新的邀请码
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public String createInvitationCode(String creatorId) {
+        InvitationCode.Status  status = InvitationCode.Status.ACTIVE;
+
+        String code = generateRandomCode(8); // 生成随机邀请码
+
+        InvitationCode invitationCode = new InvitationCode();
+        invitationCode.setCode(code);
+        invitationCode.setCreatorId(creatorId);
+        invitationCode.setStatus(status); // 初始状态为 ACTIVE
+
+        invitationCodeMapper.insert(invitationCode);
+
+        return code;
+    }
+
+
+    /**
+     * 生成指定长度的随机邀请码（字母+数字）
+     */
+    private String generateRandomCode(int length) {
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder code = new StringBuilder(length);
+        for (int i = 0; i < length; i++) {
+            int index = (int) (Math.random() * chars.length());
+            code.append(chars.charAt(index));
+        }
+        return code.toString();
     }
 }

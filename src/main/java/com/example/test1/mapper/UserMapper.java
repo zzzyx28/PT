@@ -45,4 +45,12 @@ public interface UserMapper extends BaseMapper<User> {
     int updatePhoneAndVerificationStatus(User user);
     @Select("SELECT * FROM user WHERE phone = #{phone}")
     User selectByPhone(String phone);
+
+    @Update("UPDATE user SET is_banned = #{status} WHERE user_id = #{userId}")
+    int updateBanStatus(@Param("userId") String userId, @Param("status") int status);
+
+    @Select("SELECT is_banned FROM user WHERE user_id = #{userId}")
+    int checkIfBanned(String userId);
+
+
 }

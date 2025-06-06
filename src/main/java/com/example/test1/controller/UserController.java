@@ -128,4 +128,13 @@ public class UserController {
         }
     }
 
+    @PostMapping("/new-invite-code")
+    public ResponseEntity<?> generateInviteCode(@RequestParam String creatorId) {
+        try {
+            String code = userService.createInvitationCode(creatorId);
+            return ResponseEntity.ok("邀请码已生成：" + code);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("生成邀请码失败: " + e.getMessage());
+        }
+    }
 }
