@@ -26,9 +26,10 @@ public class UserController {
             @RequestParam String username,
             @RequestParam String email,
             @RequestParam String password,
-            @RequestParam String inviteCode) {
+            @RequestParam String inviteCode,
+            @RequestParam String phone) {
         try {
-            User user = userService.register(username, email, password, inviteCode);
+            User user = userService.register(username, email, password, inviteCode, phone);
             return ResponseEntity.ok("注册成功，请查收邮箱验证邮件");
         } catch (UserException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
@@ -44,7 +45,24 @@ public class UserController {
         } catch (UserException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
-
+    }
+    @PostMapping("/send-sms-code")
+    public ResponseEntity<?> sendSmsCode(@RequestParam String phone) {
+        try {
+            userService.sendPhoneVerificationCode(phone);
+            return ResponseEntity.ok("验证码已发送");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("发送验证码失败: " + e.getMessage());
+        }
+    }
+    @GetMapping("/verify-phone")
+    public ResponseEntity<?> verifyPhone(@RequestParam String token) {
+        try {
+            userService.verifyPhone(token);
+            return ResponseEntity.ok("手机号验证成功");
+        } catch (UserException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     // 登录
@@ -58,6 +76,7 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
 
     // 修改密码
     @PostMapping("/change-password")

@@ -17,4 +17,13 @@ public interface ForumMapper extends BaseMapper<Forum> {
 
     @Select("SELECT * FROM forum ORDER BY create_time DESC LIMIT #{offset}, #{limit}")
     List<Forum> selectListWithPagination(int offset, int limit);
+
+    @Select("SELECT * FROM forum")
+    Forum selectAll();
+
+    @Select("SELECT * FROM forum where category = #{category}")
+    Forum selectByCategory(String category);
+
+    @Select("SELECT f.*, COUNT(c.comment_id) AS comments FROM forum f LEFT JOIN comment c ON f.forumId = c.forum_id GROUP BY f.forumId")
+    List<Forum> selectWithCommentCount();
 }

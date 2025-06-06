@@ -40,4 +40,17 @@ public class ForumService {
         Page<Forum> resultPage = forumMapper.selectPage(pageRequest, new QueryWrapper<>());
         return resultPage.getRecords();
     }
+
+    public List<Forum> listForumsByCategory(int category, int page, int size) {
+        Page<Forum> pageRequest = new Page<>(page, size);
+        Page<Forum> resultPage = forumMapper.selectPage(pageRequest, new QueryWrapper<Forum>().eq("category", category));
+        return resultPage.getRecords();
+    }
+
+    public void deleteForum(String forumId) {
+        int rows = forumMapper.deleteById(forumId);
+        if (rows != 1) {
+            throw new ForumOperationException("删除帖子失败");
+        }
+    }
 }

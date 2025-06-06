@@ -41,5 +41,8 @@ public interface UserMapper extends BaseMapper<User> {
     @Update("UPDATE user SET is_email_verified = true WHERE user_id = #{userId}")
     int verifyEmail(String userId);
 
-
+    @Update("UPDATE user SET phone = #{phone}, is_phone_verified = #{isPhoneVerified} WHERE user_id = #{userId}")
+    int updatePhoneAndVerificationStatus(User user);
+    @Select("SELECT * FROM user WHERE phone = #{phone}")
+    User selectByPhone(String phone);
 }

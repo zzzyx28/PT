@@ -1,71 +1,64 @@
 package com.example.test1.entity;
 
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
-import io.swagger.v3.oas.annotations.media.Schema;
-
-import lombok.Data;
-
+import com.baomidou.mybatisplus.annotation.*;
 import java.time.LocalDateTime;
-
-/**
- * @author zyx
- * @email
- * @date 2025-04-20
- */
+import java.time.format.DateTimeFormatter;
 
 @TableName("comment")
-
 public class Comment {
-    @TableId
+
+    @TableId(value = "comment_id")
     private String commentId;
 
-    @Schema(description = "LikesNumber")
-    private int likesNumber;
+    @TableField("forum_id")
+    private String forumId;
+
+    @TableField("user_id")
+    private String userId;
 
     private String content;
 
-    private LocalDateTime commentAt;
+    @TableField("create_time")
+    private String createTime;
 
-    private String postUser;
+    @TableField("update_time")
+    private String updateTime;
 
-    public String getCommentId() {
-        return commentId;
+    private Integer status; // 0: normal, 1: deleted
+
+    public interface Status {
+        int NORMAL = 0;
+        int DELETED = 1;
     }
 
-    public void setCommentId(String commentId) {
-        this.commentId = commentId;
+    // Getter and Setter methods...
+
+    public String getCommentId() { return commentId; }
+    public void setCommentId(String commentId) { this.commentId = commentId; }
+
+    public String getForumId() { return forumId; }
+    public void setForumId(String forumId) { this.forumId = forumId; }
+
+    public String getUserId() { return userId; }
+    public void setUserId(String userId) { this.userId = userId; }
+
+    public String getContent() { return content; }
+    public void setContent(String content) { this.content = content; }
+
+    public String getCreateTime() { return createTime; }
+    public void setCreateTime(String createTime) { this.createTime = createTime; }
+
+    public String getUpdateTime() { return updateTime; }
+    public void setUpdateTime(String updateTime) { this.updateTime = updateTime; }
+
+    public Integer getStatus() { return status; }
+    public void setStatus(Integer status) { this.status = status; }
+
+    public void setCreateTime(LocalDateTime time) {
+        this.createTime = time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 
-    public int getLikesNumber() {
-        return likesNumber;
-    }
-
-    public void setLikesNumber(int likesNumber) {
-        this.likesNumber = likesNumber;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
-    }
-
-    public LocalDateTime getCommentAt() {
-        return commentAt;
-    }
-
-    public void setCommentAt(LocalDateTime commentAt) {
-        this.commentAt = commentAt;
-    }
-
-    public String getPostUser() {
-        return postUser;
-    }
-
-    public void setPostUser(String postUser) {
-        this.postUser = postUser;
+    public void setUpdateTime(LocalDateTime time) {
+        this.updateTime = time.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
     }
 }

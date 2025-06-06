@@ -1,10 +1,12 @@
 package com.example.test1.service;
 
 import com.example.test1.entity.EmailVerificationToken;
+import com.example.test1.entity.PhoneVerificationToken;
 import com.example.test1.entity.User;
 import com.example.test1.exception.UserException;
 import com.example.test1.mapper.EmailVerificationTokenMapper;
 import com.example.test1.mapper.InvitationCodeMapper;
+import com.example.test1.mapper.PhoneVerificationTokenMapper;
 import com.example.test1.mapper.UserMapper;
 import com.example.test1.util.EmailUtils;
 import com.example.test1.util.PasswordUtils;
@@ -22,6 +24,8 @@ public class UserService {
     private UserMapper userMapper;
 
     @Autowired
+    private PhoneVerificationTokenMapper phoneVerificationTokenMapper;
+    @Autowired
     private EmailUtils emailUtils;
 
     @Autowired
@@ -32,13 +36,14 @@ public class UserService {
 
     // 注册用户（带邀请码）
     @Transactional(rollbackFor = Exception.class)
-    public User register(String username, String email, String password, String inviteCode) {
+    public User register(String username, String email, String password, String inviteCode, String phone) {
         if (userMapper.selectByUsername(username) != null) {
             throw new UserException("用户名已存在");
         }
         if (userMapper.selectByEmail(email) != null) {
             throw new UserException("邮箱已被注册");
         }
+
 
         // 校验邀请码...
 
@@ -58,21 +63,23 @@ public class UserService {
         user.setMagic_value(0);
 
         userMapper.insert(user);
+        // 发送手机验证码
+        sendPhoneVerificationCode(phone);
 
-        // 生成 Token 并发送验证邮件
-        String token = UUID.randomUUID().toString();
-        EmailVerificationToken verificationToken = new EmailVerificationToken();
-        verificationToken.setToken(token);
-        verificationToken.setUserId(user.getUserId());
-        verificationToken.setEmail(email);
-        verificationToken.setExpiredAt(LocalDateTime.now().plusHours(24));
+//        // 生成 Token 并发送验证邮件
+//        String token = UUID.randomUUID().toString();
+//        EmailVerificationToken verificationToken = new EmailVerificationToken();
+//        verificationToken.setToken(token);
+//        verificationToken.setUserId(user.getUserId());
+//        verificationToken.setEmail(email);
+//        verificationToken.setExpiredAt(LocalDateTime.now().plusHours(24));
+//
+//        emailVerificationTokenMapper.insert(verificationToken);
+//
+//        String verifyLink = "http://localhost:5173/api/user/verify-email?token=" + token;
 
-        emailVerificationTokenMapper.insert(verificationToken);
 
-        String verifyLink = "http://localhost:5173/api/user/verify-email?token=" + token;
-
-
-        //-----------------网络问题先注释-----------------
+////        -----------------网络问题先注释-----------------
 //        emailUtils.sendVerificationEmail(email, verifyLink);
 
         return user;
@@ -106,6 +113,51 @@ public class UserService {
         userMapper.updateById(user);
 
         emailVerificationTokenMapper.deleteByToken(token);
+    }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void verifyPhone(String token) {
+        PhoneVerificationToken verificationToken = phoneVerificationTokenMapper.findByToken(token);
+
+        if (verificationToken == null || verificationToken.isUsed()) {
+            throw new UserException("无效或已使用的验证码");
+        }
+
+        if (LocalDateTime.now().isAfter(verificationToken.getExpiredAt())) {
+            phoneVerificationTokenMapper.deleteByToken(token);
+            throw new UserException("验证码已过期，请重新获取");
+        }
+
+        User user = userMapper.selectByPhone(verificationToken.getPhone());
+        if (user == null) {
+            throw new UserException("用户不存在");
+        }
+
+        if (user.getIsPhoneVerified() == 1) {
+            throw new UserException("该手机号已验证");
+        }
+
+        user.setIsPhoneVerified(1);
+        userMapper.updatePhoneAndVerificationStatus(user);
+
+        phoneVerificationTokenMapper.markAsUsed(token);
+    }
+
+    // 发送手机验证码
+    public void sendPhoneVerificationCode(String phone) {
+        String token = UUID.randomUUID().toString();
+        LocalDateTime expiredAt = LocalDateTime.now().plusMinutes(5); // 验证码过期时间设为5分钟
+
+        PhoneVerificationToken verificationToken = new PhoneVerificationToken();
+        verificationToken.setToken(token);
+        verificationToken.setPhone(phone);
+        verificationToken.setExpiredAt(expiredAt);
+        verificationToken.setUsed(false);
+
+        phoneVerificationTokenMapper.insert(verificationToken);
+
+        // 模拟发送短信验证码逻辑，实际应调用短信服务接口
+        System.out.println("发送至 " + phone + " 的验证码是：" + token);
     }
 
 

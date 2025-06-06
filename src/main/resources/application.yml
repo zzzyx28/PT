@@ -20,7 +20,8 @@ spring:
 #        username: yxzheng28@gmail.com
         username: 2240783387@qq.com
 #        password: hiwqumaccwyybctx
-        password: nhvjhwiwnbxweacf
+        password: oecczndiouxjdifh
+
         protocol: smtp
         properties:
             mail.smtp.auth: true

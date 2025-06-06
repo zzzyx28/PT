@@ -140,4 +140,26 @@ public class User {
     public int isEmailVerified() {
         return is_email_verified;
     }
+
+    private String phone;
+    private int isPhoneVerified;
+
+    // Getter and Setter...
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public int getIsPhoneVerified() {
+        return isPhoneVerified;
+    }
+
+    public void setIsPhoneVerified(int isPhoneVerified) {
+        this.isPhoneVerified = isPhoneVerified;
+    }
 }
+
+

@@ -13,6 +13,16 @@ public class Forum {
     private String content;
     private Integer status;
 
+    private int category;
+
+    public int getCategory() {
+        return category;
+    }
+
+    public void setCategory(int category) {
+        this.category = category;
+    }
+
     @TableField("create_time")
     private String createTime;
 
@@ -22,6 +32,15 @@ public class Forum {
     @TableField("owner_id")
     private String ownerId;
 
+    private Integer comments;
+
+    public Integer getComments() {
+        return comments;
+    }
+
+    public void setComments(Integer comments) {
+        this.comments = comments;
+    }
     private Integer views;
     private Integer replies;
 

@@ -24,8 +24,9 @@ public class ForumController {
             // 测试阶段临时指定一个 ownerId
             String ownerId = Optional.ofNullable(principal)
                     .map(Principal::getName)
-                    .orElse("testUserId");  // 如果 principal 为 null，默认使用 testUserId
-
+                    .orElse("1234");  // 如果 principal 为 null，默认使用 testUserId
+            // 获取当前登录用户的 ID
+//                    .orElseThrow(() -> new ForumOperationException("用户未登录"));
             Forum created = forumService.createForum(forum, ownerId);
             return ResponseEntity.ok(created);
         } catch (ForumOperationException e) {
@@ -43,6 +44,28 @@ public class ForumController {
             return ResponseEntity.ok(forumService.listForums(page, size));
         } catch (Exception e) {
             return ResponseEntity.status(500).body("获取帖子列表失败: " + e.getMessage());
+        }
+    }
+    @GetMapping("/listByCategory")
+    public ResponseEntity<?> listForumsByCategory(
+            @RequestParam(value = "category") int category,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size
+    ){
+        try {
+            return ResponseEntity.ok(forumService.listForumsByCategory(category, page, size));
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("获取帖子列表失败: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<?> deleteForum(@RequestParam String forumId) {
+        try {
+            forumService.deleteForum(forumId);
+            return ResponseEntity.ok("帖子删除成功");
+        } catch (ForumOperationException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
