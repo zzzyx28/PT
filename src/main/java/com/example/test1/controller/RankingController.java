@@ -1,7 +1,11 @@
 package com.example.test1.controller;
 
 import com.example.test1.entity.Ranking;
+import com.example.test1.entity.Torrent;
+import com.example.test1.entity.User;
+import com.example.test1.mapper.RankingMapper;
 import com.example.test1.service.RankingService;
+import com.example.test1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -17,6 +21,9 @@ public class RankingController {
 
     @Autowired
     private RankingService rankingService;
+
+    @Autowired
+    private UserService userService;
 
     // 获取按等级排行的用户
     @GetMapping("/top-magic_value")

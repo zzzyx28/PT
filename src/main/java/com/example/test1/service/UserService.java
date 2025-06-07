@@ -1,9 +1,6 @@
 package com.example.test1.service;
 
-import com.example.test1.entity.EmailVerificationToken;
-import com.example.test1.entity.InvitationCode;
-import com.example.test1.entity.PhoneVerificationToken;
-import com.example.test1.entity.User;
+import com.example.test1.entity.*;
 import com.example.test1.exception.UserException;
 import com.example.test1.mapper.EmailVerificationTokenMapper;
 import com.example.test1.mapper.InvitationCodeMapper;
@@ -16,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -288,6 +286,20 @@ public class UserService {
             throw new UserException("用户不存在");
         }
         return user;
+    }
+
+    // 获取按等级排行的用户
+    public List<User> getTopUsersByLevel() {
+        return userMapper.findTopUsersByLevel();
+    }
+
+    // 获取按下载量排行的用户
+    public List<User> getTopUsersByDownloadCount() {
+        return userMapper.findTopUsersByDownloadCount();
+    }
+
+    public List<Torrent> getTopTorrentsByDownload() {
+        return userMapper.findTopTorrentsByDownload();
     }
 
 }

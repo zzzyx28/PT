@@ -1,8 +1,12 @@
 package com.example.test1.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.example.test1.entity.Ranking;
+import com.example.test1.entity.Torrent;
 import com.example.test1.entity.User;
 import org.apache.ibatis.annotations.*;
+
+import java.util.List;
 
 @Mapper
 public interface UserMapper extends BaseMapper<User> {
@@ -51,5 +55,25 @@ public interface UserMapper extends BaseMapper<User> {
 
     @Select("SELECT is_banned FROM user WHERE user_id = #{userId}")
     int checkIfBanned(String userId);
+
+    // 按用户等级排行
+    @Select("SELECT username, magic_value, level FROM user")
+    List<User> findTopUsersByLevel();
+
+    // 按种子下载量排行
+    @Select("SELECT t.ownerId AS userId, u.username, SUM(t.completions) AS downloadCount " +
+            "FROM torrent t " +
+            "JOIN user u ON t.ownerId = u.user_id " +
+            "GROUP BY t.ownerId, u.username " +
+            "ORDER BY downloadCount DESC LIMIT 10")
+    List<User> findTopUsersByDownloadCount();
+
+
+    @Select("SELECT t.ownerId AS userId, t.name, u.username, t.completions AS downloadCount " +
+            "FROM torrent t " +
+            "JOIN user u ON t.ownerId = u.user_id " +
+            "ORDER BY downloadCount DESC " +
+            "LIMIT 10")
+    List<Torrent> findTopTorrentsByDownload();
 
 }

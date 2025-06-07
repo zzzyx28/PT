@@ -10,7 +10,7 @@ import java.util.List;
 public interface RankingMapper {
 
     // 按用户等级排行
-    @Select("SELECT username, magic_value, level FROM user ORDER BY magic_value DESC LIMIT 10")
+    @Select("SELECT username, magic_value, level FROM user ORDER BY level DESC LIMIT 10")
     List<Ranking> findTopUsersByLevel();
 
     // 按种子下载量排行
