@@ -209,11 +209,13 @@ public class UserService {
 
 
     // 增加经验
+    @Transactional(rollbackFor = Exception.class)
     public void addExperience(String userId, long amount) {
         userMapper.addExperience(userId, amount);
     }
 
     // 增加魔力值
+    @Transactional(rollbackFor = Exception.class)
     public void addMagicValue(String userId, int amount) {
         userMapper.addMagicValue(userId, amount);
     }
@@ -276,4 +278,7 @@ public class UserService {
         }
         return code.toString();
     }
+
+
+
 }

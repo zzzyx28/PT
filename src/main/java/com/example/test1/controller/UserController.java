@@ -137,4 +137,34 @@ public class UserController {
             return ResponseEntity.status(500).body("生成邀请码失败: " + e.getMessage());
         }
     }
+
+    /**
+     * 增加用户经验值
+     */
+    @PostMapping("/add-experience")
+    public ResponseEntity<?> addExperience(
+            @RequestParam String userId,
+            @RequestParam Long amount) {
+        try {
+            userService.addExperience(userId, amount);
+            return ResponseEntity.ok("经验值已增加");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("操作失败: " + e.getMessage());
+        }
+    }
+    /**
+     * 增加用户魔力值
+     */
+    @PostMapping("/add-magic-value")
+    public ResponseEntity<?> addMagicValue(
+            @RequestParam String userId,
+            @RequestParam Integer amount) {
+        try {
+            userService.addMagicValue(userId, amount);
+            return ResponseEntity.ok("魔力值已增加");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("操作失败: " + e.getMessage());
+        }
+    }
+
 }
