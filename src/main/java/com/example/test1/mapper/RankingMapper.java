@@ -14,7 +14,7 @@ public interface RankingMapper {
     List<Ranking> findTopUsersByLevel();
 
     // 按种子下载量排行
-    @Select("SELECT t.ownerId AS userId, u.username, COUNT(t.completions) AS downloadCount " +
+    @Select("SELECT t.ownerId AS userId, u.username, SUM(t.completions) AS downloadCount " +
             "FROM torrent t " +
             "JOIN user u ON t.ownerId = u.user_id " +
             "GROUP BY t.ownerId, u.username " +

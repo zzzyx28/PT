@@ -171,13 +171,14 @@ public class UserController {
      * 获取当前登录用户的所有信息
      */
     @GetMapping("/profile")
-    public ResponseEntity<?> getUserProfile(Principal principal) {
+    public ResponseEntity<?> getUserProfile(@RequestParam String userId
+            ,Principal principal) {
         try {
-            String userName = Optional.ofNullable(principal)
-                    .map(p -> p.getName())
-                    .orElse("22301155");
+//            String userName = Optional.ofNullable(principal)
+//                    .map(p -> p.getName())
+//                    .orElse("22301155");
 
-            User user = userService.getUserByUsername(userName);
+                    User user = userService.getUserByUsername(userId);
             return ResponseEntity.ok(user);
         } catch (UserException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
