@@ -167,4 +167,24 @@ public class UserController {
         }
     }
 
+    /**
+     * 获取当前登录用户的所有信息
+     */
+    @GetMapping("/profile")
+    public ResponseEntity<?> getUserProfile(Principal principal) {
+        try {
+            String userName = Optional.ofNullable(principal)
+                    .map(p -> p.getName())
+                    .orElse("22301155");
+
+            User user = userService.getUserByUsername(userName);
+            return ResponseEntity.ok(user);
+        } catch (UserException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("获取用户信息失败: " + e.getMessage());
+        }
+    }
+
+
 }

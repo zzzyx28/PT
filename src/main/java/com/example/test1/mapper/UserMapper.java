@@ -52,5 +52,4 @@ public interface UserMapper extends BaseMapper<User> {
     @Select("SELECT is_banned FROM user WHERE user_id = #{userId}")
     int checkIfBanned(String userId);
 
-
 }

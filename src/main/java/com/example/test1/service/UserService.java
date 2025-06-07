@@ -279,6 +279,15 @@ public class UserService {
         return code.toString();
     }
 
-
+    /**
+     * 根据用户名查询用户信息
+     */
+    public User getUserByUsername(String username) {
+        User user = userMapper.selectByUsername(username);
+        if (user == null) {
+            throw new UserException("用户不存在");
+        }
+        return user;
+    }
 
 }
