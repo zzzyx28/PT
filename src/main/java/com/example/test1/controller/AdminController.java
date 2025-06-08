@@ -59,7 +59,15 @@ public class AdminController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
-
+    @PostMapping("/update-level")
+    public ResponseEntity<?> updateLevel(@RequestParam String userId, @RequestParam Integer level) {
+        try {
+            userService.updateUserLevel(userId, level);
+            return ResponseEntity.ok("用户等级已更新");
+        } catch (UserException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
 
 }
