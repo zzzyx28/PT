@@ -305,4 +305,16 @@ public class UserService {
     public List<User> getAllUsers() {
         return userMapper.findAllUsers();
     }
+    /**
+     * 修改用户等级
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public void updateUserLevel(String userId, Integer newLevel) {
+        User user = userMapper.selectByUserId(userId);
+        if (user == null) {
+            throw new UserException("用户不存在");
+        }
+        user.setLevel(newLevel);
+        userMapper.updateById(user);
+    }
 }
