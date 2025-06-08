@@ -8,6 +8,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/api/admin")
@@ -28,6 +30,15 @@ public class AdminController {
 
         invitationCodeMapper.insert(invitationCode);
         return ResponseEntity.ok().body("邀请码生成成功: " + code);
+    }
+    @GetMapping("/invite-code/list")
+    public ResponseEntity<?> listInviteCodes() {
+        try {
+            List<InvitationCode> codes = invitationCodeMapper.selectList(null);
+            return ResponseEntity.ok(codes);
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("获取邀请码列表失败: " + e.getMessage());
+        }
     }
 
     private String generateRandomCode() {
