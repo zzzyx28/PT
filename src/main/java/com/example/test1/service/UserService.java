@@ -302,4 +302,7 @@ public class UserService {
         return userMapper.findTopTorrentsByDownload();
     }
 
+    public List<User> getAllUsers() {
+        return userMapper.findAllUsers();
+    }
 }

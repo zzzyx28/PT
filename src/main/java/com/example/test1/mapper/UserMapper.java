@@ -75,5 +75,6 @@ public interface UserMapper extends BaseMapper<User> {
             "ORDER BY downloadCount DESC " +
             "LIMIT 10")
     List<Torrent> findTopTorrentsByDownload();
-
+    @Select("SELECT * FROM user")
+    List<User> findAllUsers();
 }
