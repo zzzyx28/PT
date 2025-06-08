@@ -19,6 +19,6 @@ public interface MessageMapper extends BaseMapper<Message> {
     @Select("SELECT * FROM private_message WHERE sender_id = #{userId} OR receiver_id = #{userId} ORDER BY create_time DESC LIMIT #{offset}, #{limit}")
     List<Message> selectByUserId(@Param("userId") String userId, @Param("offset") int offset, @Param("limit") int limit);
 
-    @Update("UPDATE private_message SET is_read = true WHERE receiver_id = #{userId} AND message_id = #{messageId}")
+    @Update("UPDATE private_message SET is_read = true WHERE message_id = #{messageId}")
     int markAsRead(@Param("userId") String userId, @Param("messageId") String messageId);
 }
