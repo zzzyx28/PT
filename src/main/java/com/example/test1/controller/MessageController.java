@@ -38,12 +38,12 @@ public class MessageController {
     public ResponseEntity<?> getReceivedMessages(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "userId") String userId,
             Principal principal) {
         try {
-            String userId = Optional.ofNullable(principal)
-                    .map(Principal::getName)
-                    .orElse("User2");
-
+//            String userId = Optional.ofNullable(principal)
+//                    .map(Principal::getName)
+//                    .orElse("User2");
             return ResponseEntity.ok(messageService.getMessagesByReceiver(userId, page, size));
         } catch (Exception e) {
             return ResponseEntity.status(500).body("获取私信失败: " + e.getMessage());
@@ -54,11 +54,12 @@ public class MessageController {
     public ResponseEntity<?> getAllMessages(
             @RequestParam(value = "page", defaultValue = "1") int page,
             @RequestParam(value = "size", defaultValue = "10") int size,
+            @RequestParam(value = "userId") String userId,
             Principal principal) {
         try {
-            String userId = Optional.ofNullable(principal)
-                    .map(Principal::getName)
-                    .orElse("testUserId");
+//            String userId = Optional.ofNullable(principal)
+//                    .map(Principal::getName)
+//                    .orElse("testUserId");
 
             return ResponseEntity.ok(messageService.getAllMessages(userId, page, size));
         } catch (Exception e) {
