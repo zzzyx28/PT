@@ -34,7 +34,7 @@ public class AdminController {
     @GetMapping("/invite-code/list")
     public ResponseEntity<?> listInviteCodes() {
         try {
-            List<InvitationCode> codes = invitationCodeMapper.selectList(null);
+            List<InvitationCode> codes = invitationCodeMapper.selectCodeList();
             return ResponseEntity.ok(codes);
         } catch (Exception e) {
             return ResponseEntity.status(500).body("获取邀请码列表失败: " + e.getMessage());
