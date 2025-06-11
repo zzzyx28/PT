@@ -3,6 +3,7 @@ package com.example.test1.controller;
 import com.example.test1.entity.Forum;
 import com.example.test1.exception.ForumOperationException;
 import com.example.test1.service.ForumService;
+import com.example.test1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,8 @@ public class ForumController {
 
     @Autowired
     private ForumService forumService;
-
+    @Autowired
+    private UserService userService;
     @PostMapping("/create")
     public ResponseEntity<?> createForum(@RequestBody Forum forum, Principal principal) {
         try {
@@ -28,6 +30,8 @@ public class ForumController {
             // 获取当前登录用户的 ID
 //                    .orElseThrow(() -> new ForumOperationException("用户未登录"));
             Forum created = forumService.createForum(forum, ownerId);
+            userService.addExperience(ownerId,100);
+            userService.addMagicValue(ownerId,100);
             return ResponseEntity.ok(created);
         } catch (ForumOperationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

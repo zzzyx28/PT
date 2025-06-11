@@ -3,6 +3,7 @@ package com.example.test1.controller;
 import com.example.test1.entity.Comment;
 import com.example.test1.exception.ForumOperationException;
 import com.example.test1.service.CommentService;
+import com.example.test1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,8 @@ public class CommentController {
 
     @Autowired
     private CommentService commentService;
-
+    @Autowired
+    private UserService userService;
     @PostMapping("/add")
     public ResponseEntity<?> addComment(@RequestBody Comment comment, Principal principal) {
         try {
@@ -28,6 +30,8 @@ public class CommentController {
 //                    .orElseThrow(() -> new ForumOperationException("用户未登录"));
 
             Comment created = commentService.addComment(comment, userId);
+            userService.addExperience(userId,100);
+            userService.addMagicValue(userId,100);
             return ResponseEntity.ok(created);
         } catch (ForumOperationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());

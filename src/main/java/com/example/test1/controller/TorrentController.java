@@ -5,6 +5,7 @@ import com.example.test1.entity.Torrent;
 import com.example.test1.exception.BencodeException;
 import com.example.test1.exception.TorrentProcessingException;
 import com.example.test1.service.TorrentService;
+import com.example.test1.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -27,7 +28,8 @@ public class TorrentController {
     private TorrentService torrentService;
     @Autowired
     private TorrentMapper torrentMapper;
-
+    @Autowired
+    private UserService userService;
 
 
     @PostMapping("/upload")
@@ -38,6 +40,8 @@ public class TorrentController {
             @RequestParam(value = "uid", required = false) String uid,
             Principal principal) {
         try {
+            userService.addExperience(uid,100);
+            userService.addMagicValue(uid,100);
             Torrent torrent = torrentService.uploadAndSaveTorrent(file, category, description, principal,uid);
             return ResponseEntity.ok(torrent);
         } catch (TorrentProcessingException e) {
