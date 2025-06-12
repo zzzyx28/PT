@@ -249,4 +249,29 @@ public class TorrentService {
     public List<Torrent> listByOwnerWithCondition(String ownerId, String category, String orderBy) {
         return torrentMapper.selectByOwnerIdXml(ownerId);
     }
+
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteTorrent(String torrentId) {
+        Torrent torrent = torrentMapper.selectById(torrentId);
+        if (torrent == null) {
+            throw new TorrentProcessingException("种子不存在");
+        }
+
+        // 1. 删除本地文件
+        Path filePath = Paths.get(torrent.getStoragePath());
+        if (Files.exists(filePath)) {
+            try {
+                Files.delete(filePath);
+            } catch (IOException e) {
+                throw new TorrentProcessingException("无法删除种子文件", e);
+            }
+        }
+
+        // 删除数据库记录
+        int rowsAffected = torrentMapper.deleteById(torrentId);
+        if (rowsAffected != 1) {
+            throw new TorrentProcessingException("种子删除失败");
+        }
+    }
+
 }

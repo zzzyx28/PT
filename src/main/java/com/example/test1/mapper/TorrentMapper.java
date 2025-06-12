@@ -10,9 +10,6 @@ import java.util.List;
 @Mapper
 public interface TorrentMapper extends BaseMapper<Torrent> {
 
-    @Delete("DELETE FROM torrent WHERE torrent_id = #{torrentId}")
-    int deleteById(String torrentId);
-
     @Select("SELECT * FROM torrent WHERE torrentId = #{torrentId}")
     @Results(id = "torrentResultMap", value = {
             @Result(property = "torrentId", column = "torrent_id"),
@@ -45,4 +42,7 @@ public interface TorrentMapper extends BaseMapper<Torrent> {
      * XML方式查询（可选）
      */
     List<Torrent> selectByOwnerIdXml(@Param("ownerId") String ownerId);
+
+    @Delete("DELETE FROM torrent WHERE torrentId = #{torrentId}")
+    int deleteById(String torrentId);
 }
