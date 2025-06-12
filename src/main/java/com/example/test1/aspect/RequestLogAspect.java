@@ -1,9 +1,9 @@
 package com.example.test1.aspect;
 
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.serializer.PropertyFilter;
 import com.example.test1.entity.ApiLog;
 import com.example.test1.mapper.ApiLogMapper;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import org.springframework.web.multipart.MultipartFile;
 import jakarta.servlet.http.HttpServletRequest;
-
 
 import java.util.HashMap;
 import java.util.Map;
@@ -39,7 +39,7 @@ public class RequestLogAspect {
 
         ServletRequestAttributes attributes =
                 (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = attributes != null ?  attributes.getRequest() : null;
+        HttpServletRequest request = attributes != null ? attributes.getRequest() : null;
 
         String methodName = joinPoint.getSignature().getName();
         String className = joinPoint.getTarget().getClass().getSimpleName();
@@ -48,19 +48,25 @@ public class RequestLogAspect {
         String[] paramNames = methodSignature.getParameterNames();
         Object[] args = joinPoint.getArgs();
 
+        // 构建参数 Map，并处理 MultipartFile
         Map<String, Object> params = new HashMap<>();
         if (paramNames != null) {
             for (int i = 0; i < paramNames.length; i++) {
-                params.put(paramNames[i], args[i]);
+                if (args[i] instanceof MultipartFile) {
+                    MultipartFile file = (MultipartFile) args[i];
+                    // 只记录文件名和大小，避免直接序列化 MultipartFile
+                    Map<String, Object> fileInfo = new HashMap<>();
+                    fileInfo.put("fileName", file.getOriginalFilename());
+                    fileInfo.put("fileSize", file.getSize());
+                    params.put(paramNames[i], fileInfo);
+                } else {
+                    params.put(paramNames[i], args[i]);
+                }
             }
         }
 
         String url = request != null ? request.getRequestURL().toString() : "N/A";
         String httpMethod = request != null ? request.getMethod() : "N/A";
-
-//        log.info("➡️ 请求开始 [{} {}] {}.{} | 参数: {}",
-//                httpMethod, url, className, methodName,
-//                JSON.toJSONString(params));
 
         Object result = null;
         int status = 200;
@@ -74,20 +80,20 @@ public class RequestLogAspect {
             stopWatch.stop();
             long duration = stopWatch.getTotalTimeMillis();
 
+            // 使用 FastJSON 的 PropertyFilter 过滤掉不可序列化的对象
+            PropertyFilter filter = (object, name, value) -> !(value instanceof MultipartFile);
+            String paramsJson = JSON.toJSONString(params, filter);
+            String resultJson = JSON.toJSONString(result, filter);
+
             ApiLog apiLog = new ApiLog(
                     httpMethod,
                     url,
-                    JSON.toJSONString(params),
+                    paramsJson,
                     status,
-                    JSON.toJSONString(result),
+                    resultJson,
                     duration
             );
             apiLogMapper.insert(apiLog);
-
-//            log.info("⬅️ 请求结束 [{} {}] {}.{} | 耗时: {}ms | 返回: {}",
-//                    httpMethod, url, className, methodName,
-//                    duration,
-//                    JSON.toJSONString(result));
         }
     }
 }

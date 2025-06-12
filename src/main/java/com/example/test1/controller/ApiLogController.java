@@ -11,6 +11,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/logs")
+@CrossOrigin(origins = "http://localhost:5173")
 public class ApiLogController {
 
     @Autowired
