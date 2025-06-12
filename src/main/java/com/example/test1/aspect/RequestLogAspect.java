@@ -11,6 +11,8 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -80,10 +82,26 @@ public class RequestLogAspect {
             stopWatch.stop();
             long duration = stopWatch.getTotalTimeMillis();
 
-            // 使用 FastJSON 的 PropertyFilter 过滤掉不可序列化的对象
-            PropertyFilter filter = (object, name, value) -> !(value instanceof MultipartFile);
-            String paramsJson = JSON.toJSONString(params, filter);
-            String resultJson = JSON.toJSONString(result, filter);
+            // 处理返回值：特殊处理 Resource 类型（文件下载）
+            String resultJson;
+            if (result instanceof ResponseEntity) {
+                ResponseEntity<?> responseEntity = (ResponseEntity<?>) result;
+                if (responseEntity.getBody() instanceof Resource) {
+                    resultJson = "{type: \"Resource\", downloadable: true}";
+                } else {
+                    resultJson = JSON.toJSONString(responseEntity.getBody());
+                }
+            } else {
+                // 使用 PropertyFilter 过滤不可序列化的对象
+                PropertyFilter filter = (object, name, value) ->
+                        !(value instanceof MultipartFile || value instanceof Resource);
+                resultJson = JSON.toJSONString(result, filter);
+            }
+
+            // 序列化参数
+            PropertyFilter paramFilter = (object, name, value) ->
+                    !(value instanceof MultipartFile || value instanceof Resource);
+            String paramsJson = JSON.toJSONString(params, paramFilter);
 
             ApiLog apiLog = new ApiLog(
                     httpMethod,
