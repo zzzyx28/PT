@@ -19,13 +19,9 @@ public class MessageController {
     private MessageService messageService;
 
     @PostMapping("/send")
-    public ResponseEntity<?> sendMessage(@RequestBody Message message, Principal principal) {
+    public ResponseEntity<?> sendMessage(@RequestBody Message message) {
         try {
-            String senderId = Optional.ofNullable(principal)
-                    .map(Principal::getName)
-                    .orElse("testUserId");
-
-            Message sent = messageService.sendMessage(message, senderId);
+            Message sent = messageService.sendMessage(message, message.getSenderId(), message.getReceiverId());
             return ResponseEntity.ok(sent);
         } catch (MessageOperationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
