@@ -1,5 +1,6 @@
 package com.example.test1.controller;
 
+import com.example.test1.entity.CreateForumRequest;
 import com.example.test1.entity.Forum;
 import com.example.test1.exception.ForumOperationException;
 import com.example.test1.service.ForumService;
@@ -20,25 +21,32 @@ public class ForumController {
     private ForumService forumService;
     @Autowired
     private UserService userService;
+// ForumController.java
+
     @PostMapping("/create")
-    public ResponseEntity<?> createForum(@RequestBody Forum forum, Principal principal) {
+    public ResponseEntity<?> createForum(@RequestBody CreateForumRequest request) {
         try {
-            // 测试阶段临时指定一个 ownerId
-            String ownerId = Optional.ofNullable(principal)
-                    .map(Principal::getName)
-                    .orElse("1234");  // 如果 principal 为 null，默认使用 testUserId
-            // 获取当前登录用户的 ID
-//                    .orElseThrow(() -> new ForumOperationException("用户未登录"));
-            Forum created = forumService.createForum(forum, ownerId);
-            userService.addExperience(ownerId,100);
-            userService.addMagicValue(ownerId,100);
-            return ResponseEntity.ok(created);
+            String ownerId = request.getOwnerId();
+            Forum forum = request.getForum();
+
+            if (ownerId == null || ownerId.isEmpty() || forum == null) {
+                return ResponseEntity.badRequest().body("缺少必要的参数");
+            }
+
+            Forum newForum = forumService.createForum(request);
+
+            userService.addExperience(ownerId, 100);
+            userService.addMagicValue(ownerId, 100);
+
+            return ResponseEntity.ok(newForum);
         } catch (ForumOperationException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(500).body("服务器错误: " + e.getMessage());
         }
     }
+
+
 
     @GetMapping("/list")
     public ResponseEntity<?> listForums(
