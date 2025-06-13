@@ -22,10 +22,11 @@ public interface RankingMapper {
     List<Ranking> findTopUsersByDownloadCount();
 
 
-    @Select("SELECT t.ownerId AS userId, t.name, u.username, t.completions AS downloadCount " +
+    @Select("SELECT t.torrentId, t.name, t.completions AS downloadCount, u.username " +
             "FROM torrent t " +
-            "JOIN user u ON t.ownerId = u.user_id " +
-            "ORDER BY downloadCount DESC " +
+            "JOIN user u ON t.owner_id = u.user_id " +
+            "ORDER BY t.completions DESC " +
             "LIMIT 10")
     List<Ranking> findTopTorrentsByDownload();
+
 }

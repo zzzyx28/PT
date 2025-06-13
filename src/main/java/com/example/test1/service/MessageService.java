@@ -19,13 +19,14 @@ public class MessageService {
     private MessageMapper messageMapper;
 
     @Transactional(rollbackFor = Exception.class)
-    public Message sendMessage(Message message, String senderId) {
+    public Message sendMessage(Message message, String senderId, String receiverId) {
         message.setMessageId(java.util.UUID.randomUUID().toString());
         message.setSenderId(senderId);
+        message.setReceiverId(receiverId);
         message.setCreateTime(LocalDateTime.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE_TIME));
         message.setIsRead(false);
 
-        int rows = messageMapper.insert(message);
+        int rows = messageMapper.insertMessage(message);
         if (rows != 1) {
             throw new MessageOperationException("发送私信失败");
         }

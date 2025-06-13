@@ -39,9 +39,16 @@ public class UserService {
         if (userMapper.selectByUsername(username) != null) {
             throw new UserException("用户名已存在");
         }
-        if (userMapper.selectByEmail(email) != null) {
-            throw new UserException("邮箱已被注册");
+
+        InvitationCode invitationCode = invitationCodeMapper.findByCode(inviteCode);
+        if (invitationCode == null) {
+            throw new UserException("邀请码不存在");
         }
+
+        if (invitationCode.getStatus() == InvitationCode.Status.USED) {
+            throw new UserException("该邀请码已被使用");
+        }
+
 
 
         // 校验邀请码...
@@ -164,8 +171,12 @@ public class UserService {
     public User login(String email, String password) {
         User user = userMapper.selectByEmail(email);
 
+
+        if (user == null || !PasswordUtils.check(password, user.getPassword())) {
+            throw new UserException("邮箱或密码错误");
+        }
         //  ------------测试-----------
-        user.setIs_email_verified(1);
+//        user.setIs_email_verified(1);
 
         if (user.getIsBanned() == 1) {
             throw new UserException("该账号已被封禁，请联系管理员");
@@ -174,10 +185,6 @@ public class UserService {
 
         if (user == null || !PasswordUtils.check(password, user.getPassword())) {
             throw new UserException("邮箱或密码错误");
-        }
-
-        if (user.isEmailVerified() != 1) {
-            throw new UserException("邮箱尚未验证，请先完成邮箱验证  "+user.getEmail()+"  "+user.isEmailVerified());
         }
 
         return user;

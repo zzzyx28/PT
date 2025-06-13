@@ -26,4 +26,12 @@ public interface ForumMapper extends BaseMapper<Forum> {
 
     @Select("SELECT f.*, COUNT(c.comment_id) AS comments FROM forum f LEFT JOIN comment c ON f.forumId = c.forum_id GROUP BY f.forumId")
     List<Forum> selectWithCommentCount();
+
+    @Insert({
+            "<script>",
+            "INSERT INTO forum (forumId, title, content, status, category, create_time, update_time, owner_id)",
+            "VALUES (#{forumId}, #{title}, #{content}, #{status}, #{category}, #{createTime}, #{updateTime}, #{ownerId})",
+            "</script>"
+    })
+    int insertForum(Forum forum);
 }
