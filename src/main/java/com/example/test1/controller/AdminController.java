@@ -93,6 +93,10 @@ public class AdminController {
             if(magic>=50){
                 userService.addMagicValue(id,-50);
                 String code=generateRandomCode();
+                InvitationCode invitationCode = new InvitationCode();
+                invitationCode.setCode(code);
+                invitationCode.setCreatorId(userId);
+                invitationCodeMapper.insert(invitationCode);
                 return ResponseEntity.ok().body("购买邀请码成功 " + code);
             }
             else{
