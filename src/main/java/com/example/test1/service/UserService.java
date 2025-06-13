@@ -171,8 +171,12 @@ public class UserService {
     public User login(String email, String password) {
         User user = userMapper.selectByEmail(email);
 
+
+        if (user == null || !PasswordUtils.check(password, user.getPassword())) {
+            throw new UserException("邮箱或密码错误");
+        }
         //  ------------测试-----------
-        user.setIs_email_verified(1);
+//        user.setIs_email_verified(1);
 
         if (user.getIsBanned() == 1) {
             throw new UserException("该账号已被封禁，请联系管理员");
@@ -181,10 +185,6 @@ public class UserService {
 
         if (user == null || !PasswordUtils.check(password, user.getPassword())) {
             throw new UserException("邮箱或密码错误");
-        }
-
-        if (user.isEmailVerified() != 1) {
-            throw new UserException("邮箱尚未验证，请先完成邮箱验证  "+user.getEmail()+"  "+user.isEmailVerified());
         }
 
         return user;
