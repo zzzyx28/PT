@@ -1,6 +1,7 @@
 package com.example.test1.controller;
 
 import com.example.test1.entity.InvitationCode;
+import com.example.test1.entity.User;
 import com.example.test1.exception.UserException;
 import com.example.test1.mapper.InvitationCodeMapper;
 import com.example.test1.service.UserService;
@@ -75,6 +76,29 @@ public class AdminController {
         try {
             userService.updateUserLevel(userId, level);
             return ResponseEntity.ok("用户等级已更新");
+        } catch (UserException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/invite-code/buy/{userId}")
+    public ResponseEntity<?> buy(@PathVariable String userId) {
+        try {
+            User user=userService.getUserByUsername(userId);
+            System.out.println("**********");
+            System.out.println(user);
+            int magic=user.getMagic_value();
+            String id=user.getUserId();
+            System.out.println(magic);
+            if(magic>=50){
+                userService.addMagicValue(id,-50);
+                String code=generateRandomCode();
+                return ResponseEntity.ok().body("购买邀请码成功 " + code);
+            }
+            else{
+                return ResponseEntity.ok("魔力值不足");
+            }
+
         } catch (UserException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

@@ -19,7 +19,7 @@ public class User {
     private Long experience;
     private Integer level;
     @TableField("magic_value")
-    private Integer magic_value;
+    private int magicValue;
 
     private int is_email_verified;
 
@@ -105,12 +105,12 @@ public class User {
         this.level = level;
     }
 
-    public Integer getMagic_value() {
-        return magic_value;
+    public int getMagic_value() {
+        return magicValue;
     }
 
-    public void setMagic_value(Integer magic_value) {
-        this.magic_value = magic_value;
+    public void setMagic_value(int magic_value) {
+        this.magicValue = magic_value;
     }
 
     public int getIs_email_verified() {
