@@ -39,9 +39,16 @@ public class UserService {
         if (userMapper.selectByUsername(username) != null) {
             throw new UserException("用户名已存在");
         }
-        if (userMapper.selectByEmail(email) != null) {
-            throw new UserException("邮箱已被注册");
+
+        InvitationCode invitationCode = invitationCodeMapper.findByCode(inviteCode);
+        if (invitationCode == null) {
+            throw new UserException("邀请码不存在");
         }
+
+        if (invitationCode.getStatus() == InvitationCode.Status.USED) {
+            throw new UserException("该邀请码已被使用");
+        }
+
 
 
         // 校验邀请码...
